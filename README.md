@@ -1,4 +1,4 @@
-# swiss-knife
+# tools
 
 Text and data tools that run entirely in the browser, in the same visual
 language as [marpheus.dev](https://marpheus.dev). Meant for

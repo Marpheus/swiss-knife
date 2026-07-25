@@ -1,4 +1,4 @@
-/* swiss-knife — the tool shell
+/* tools — the tool shell
    One skeleton every tool borrows: bar, toolbar, panes, status line.
    Tools that need something extra add it at the bottom of this file, not
    in their own stylesheet — one file keeps them looking like siblings. */

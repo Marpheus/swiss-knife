@@ -25,10 +25,10 @@
   var payloadText = '';
   var runId = 0;   /* verification is async; only the latest run may report */
 
-  /* a token signed with the secret "swiss-knife", so verify can be tried out */
+  /* a token signed with the secret "tools", so verify can be tried out */
   var SAMPLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
     'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ik1hcm9zIiwicm9sZSI6WyJhZG1pbiJdLCJpYXQiOjE3ODI4OTcxMjAsImV4cCI6MTc5ODc5NDcyMH0.' +
-    'qtgXbxpqYAkzYiLqoKG1YX9H37l7HZUeHeZQ2zsf-uo';
+    'SUsxd9MzKplLPT5l5hGkvxGX0bTJYg1qWFgeWNKB7t0';
 
   /* ── decode ──────────────────────────────────────────────────── */
 
@@ -316,7 +316,7 @@
       els.keyRow.hidden = false;
       els.b64opt.hidden = false;
     }
-    els.key.value = 'swiss-knife';
+    els.key.value = 'tools';
     run();
   });
 

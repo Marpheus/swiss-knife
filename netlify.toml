@@ -1,4 +1,4 @@
-# swiss-knife on Netlify.
+# tools on Netlify.
 #
 # There is no build: the repository is the site. Netlify serves /json/ from
 # json/index.html on its own, redirects /json to /json/, and uses 404.html for

@@ -11,7 +11,7 @@
   if (bar) {
     bar.className = 'bar';
     bar.innerHTML =
-      '<a class="crumb" href="/">swiss-knife</a>' +
+      '<a class="crumb" href="/">tools</a>' +
       '<span class="crumb-sep" aria-hidden="true">/</span>' +
       '<span class="crumb-now">' + esc(tool.name) + '</span>' +
       '<span class="spacer"></span>' +

@@ -29,7 +29,7 @@
 
   var SAMPLE = JSON.stringify({
     id: 'a3f1',
-    name: 'swiss-knife',
+    service: 'tools.marpheus.dev',
     offline: true,
     tools: ['json', 'regex', 'base64', 'jwt', 'diff'],
     limits: { maxUploadBytes: 0, telemetry: null },
