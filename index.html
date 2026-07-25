@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>swiss-knife — offline text &amp; data tools</title>
+<meta name="description" content="Text and data tools that run entirely in your browser. JSON, regex, base64, JWT, diff — nothing is ever uploaded.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="canonical" href="https://tools.marpheus.dev/">
+
+<!-- connect-src 'none' is the whole pitch, enforced rather than promised:
+     no fetch, no XHR, no websocket, no beacon can leave this page. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
+
+<meta property="og:title" content="swiss-knife">
+<meta property="og:description" content="Offline text &amp; data tools. Nothing leaves your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tools.marpheus.dev/">
+<meta property="og:site_name" content="tools.marpheus.dev">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+<script src="/assets/theme-init.js"></script>
+</head>
+<body>
+
+<button class="theme floating" type="button" aria-label="Switch colour theme" aria-pressed="false">
+  <span class="dial" aria-hidden="true"></span>
+</button>
+
+<main class="wrap">
+
+  <header class="intro">
+    <img class="logo" src="/mark.svg" alt="" width="1721" height="1721" data-reveal>
+    <h1 class="name" data-reveal>swiss-knife</h1>
+    <p class="tagline" data-reveal>
+      text and data tools that never phone home.
+      <span class="dim">everything runs in this tab.</span>
+    </p>
+  </header>
+
+  <div class="find needs-js" data-reveal>
+    <label class="find-label" for="find">find</label>
+    <input id="find" type="text" placeholder="json, base64, timestamp…" autocomplete="off" spellcheck="false">
+    <span class="find-count" id="find-count"></span>
+  </div>
+
+  <p class="no-js-note">
+    This page lists its tools with JavaScript — which is also the only thing
+    that runs them. Enable it and nothing will be sent anywhere regardless.
+  </p>
+
+  <div id="groups"></div>
+  <p class="no-hits" id="no-hits" hidden>nothing matches. try a shorter word.</p>
+
+  <footer class="foot" data-reveal>
+    <p class="vow">no uploads, no accounts, no analytics</p>
+    <p><a href="https://marpheus.dev/">marpheus.dev</a></p>
+  </footer>
+
+</main>
+
+<script src="/assets/registry.js"></script>
+<script src="/assets/home.js" defer></script>
+<script src="/assets/theme.js" defer></script>
+</body>
+</html>

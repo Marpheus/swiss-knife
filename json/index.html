@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>json — swiss-knife</title>
+<meta name="description" content="Format, minify and validate JSON in your browser. Nothing is uploaded.">
+<meta name="theme-color" content="#0a0a0a">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+<link rel="stylesheet" href="/assets/tool.css">
+<script src="/assets/theme-init.js"></script>
+</head>
+<body data-tool="json">
+
+<a class="skip" href="#in">skip to the input</a>
+
+<main class="wrap tool">
+
+  <header id="bar"></header>
+  <div id="tool-head"></div>
+
+  <p class="no-js-note">This tool is JavaScript — that is why it can run without a server. Enable it to continue.</p>
+
+  <div class="toolbar needs-js">
+    <div class="seg" role="group" aria-label="Mode">
+      <button type="button" data-mode="format" aria-pressed="true">format</button>
+      <button type="button" data-mode="minify" aria-pressed="false">minify</button>
+      <button type="button" data-mode="tree" aria-pressed="false">tree</button>
+      <button type="button" data-mode="stringify" aria-pressed="false">to string</button>
+      <button type="button" data-mode="parse" aria-pressed="false">from string</button>
+    </div>
+
+    <label class="field" id="indent-field">indent
+      <select id="indent">
+        <option value="2">2</option>
+        <option value="4">4</option>
+        <option value="\t">tab</option>
+      </select>
+    </label>
+
+    <label class="opt"><input type="checkbox" id="sort"> sort keys</label>
+
+    <span class="spacer"></span>
+
+    <div class="actions">
+      <button class="btn" type="button" id="sample">sample</button>
+      <button class="btn" type="button" id="copy">copy</button>
+      <button class="btn" type="button" id="save">download</button>
+      <button class="btn" type="button" id="clear">clear</button>
+    </div>
+  </div>
+
+  <div class="panes needs-js">
+    <section class="pane" id="in-pane" aria-label="Input">
+      <div class="pane-head"><span>input</span><span class="spacer"></span><span id="in-size"></span></div>
+      <div class="pane-body">
+        <textarea id="in" spellcheck="false" autocomplete="off" autocapitalize="off"
+                  placeholder="paste json here, or drop a file"></textarea>
+      </div>
+    </section>
+
+    <section class="pane" aria-label="Output">
+      <div class="pane-head">
+        <span id="out-label">output</span><span class="spacer"></span>
+        <button class="btn" type="button" id="wrap-toggle" aria-pressed="false">wrap</button>
+      </div>
+      <div class="pane-body">
+        <pre class="out" id="out" data-empty="output appears as you type" tabindex="0"></pre>
+        <div class="tree" id="tree" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+
+  <footer id="foot"></footer>
+</main>
+
+<script src="/assets/registry.js"></script>
+<script src="/assets/chrome.js"></script>
+<script src="/assets/bytes.js" defer></script>
+<script src="/assets/ui.js" defer></script>
+<script src="/json/json.js" defer></script>
+<script src="/assets/theme.js" defer></script>
+</body>
+</html>

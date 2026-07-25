@@ -1,0 +1,49 @@
+# swiss-knife on Netlify.
+#
+# There is no build: the repository is the site. Netlify serves /json/ from
+# json/index.html on its own, redirects /json to /json/, and uses 404.html for
+# anything missing, so none of that needs configuring here.
+
+[build]
+  publish = "."
+
+# ─── headers ──────────────────────────────────────────────────────────────
+#
+# Every page already carries the same policy in a <meta> tag so the site is
+# just as locked down opened from disk or served from anywhere else. Sending
+# it as a real header as well is not belt and braces: a few directives —
+# frame-ancestors among them — are ignored in <meta> by specification, and
+# only count when they arrive as a header.
+
+[[headers]]
+  for = "/*"
+
+  [headers.values]
+    # connect-src 'none' is the whole point of the site: no fetch, no XHR,
+    # no WebSocket, no sendBeacon can leave the page. worker-src is spelled
+    # out because the regex tool runs its matching in one.
+    Content-Security-Policy = "default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; font-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
+
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Permissions-Policy = "accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
+
+    # Filenames carry no content hash, so nothing may be cached hard: a stale
+    # tool.css against a fresh json.js is a broken page. Revalidation on a
+    # 250 kB site is a handful of 304s. If assets ever get hashed names, this
+    # is the line to change to immutable.
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ─── keep the workings out of the served site ─────────────────────────────
+
+[[redirects]]
+  from = "/test/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404.html"
+  status = 404

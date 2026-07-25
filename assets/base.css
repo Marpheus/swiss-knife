@@ -1,0 +1,402 @@
+/* swiss-knife — shared shell
+   Tokens and chrome are lifted from marpheus.dev so the two read as one site.
+   Everything here is layout and type; the tools bring their own controls. */
+
+:root {
+  color-scheme: dark;
+  --bg:        #0a0a0a;
+  --ink:       #f0efed;
+  --ink-dim:   #8a8a88;
+  --ink-faint: #6b6b68;
+  --line:      #1f1f1e;
+  --logo-flip: 0;   /* the mark ships white; light mode inverts it */
+
+  /* the only colour that ever appears: pass / fail. everything else is grey. */
+  --ok:  #7fb08a;
+  --err: #d9776c;
+  /* panels sit a hair off the background rather than on a border alone */
+  --sunk:  rgba(255, 255, 255, 0.022);
+  --raise: rgba(255, 255, 255, 0.05);
+
+  --font: ui-monospace, "SF Mono", SFMono-Regular, "JetBrains Mono",
+          "Cascadia Mono", Menlo, Consolas, monospace;
+
+  --pad: clamp(1.5rem, 6vw, 5rem);
+  --measure: 46rem;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* light mode: the paper the logo art was drawn on. declared twice on purpose —
+   once for "system says light, user hasn't chosen", once for an explicit choice. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:        #f7f6f2;
+    --ink:       #14140f;
+    --ink-dim:   #6a6a64;
+    --ink-faint: #82817a;
+    --line:      #dedcd3;
+    --logo-flip: 1;
+    --ok:  #3f7a4f;
+    --err: #b3402f;
+    --sunk:  rgba(0, 0, 0, 0.025);
+    --raise: rgba(0, 0, 0, 0.05);
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:        #f7f6f2;
+  --ink:       #14140f;
+  --ink-dim:   #6a6a64;
+  --ink-faint: #82817a;
+  --line:      #dedcd3;
+  --logo-flip: 1;
+  --ok:  #3f7a4f;
+  --err: #b3402f;
+  --sunk:  rgba(0, 0, 0, 0.025);
+  --raise: rgba(0, 0, 0, 0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* the attribute has to beat every `display` a class might set, or a hidden
+   .field / .opt / .msg would keep showing up */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: clamp(0.9rem, 0.55rem + 1vw, 1rem);
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  /* the theme change eases rather than snaps */
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+::selection { background: var(--ink); color: var(--bg); }
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* skip past the chrome; only shows itself once tabbed to */
+.skip {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 40;
+  padding: 0.4rem 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 0.75rem;
+  transform: translateY(-160%);
+  transition: transform 0.25s var(--ease);
+}
+.skip:focus-visible { transform: none; }
+
+/* ─── layout ─────────────────────────────────────────────────────── */
+
+.wrap {
+  max-width: var(--measure);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vh, 4rem) var(--pad) clamp(1.75rem, 4vh, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 4.5vh, 3rem);
+}
+/* the homepage centres its one calm group; tool pages start at the top */
+.wrap.centred { justify-content: center; }
+
+.foot { margin-top: clamp(0.5rem, 2vh, 1.5rem); }
+
+/* ─── the mark ───────────────────────────────────────────────────── */
+
+.logo {
+  display: block;
+  width: clamp(3.25rem, 11vw, 4.25rem);
+  height: auto;
+  margin: 0 0 1.2rem -0.2rem;
+  opacity: 0.95;
+  filter: invert(var(--logo-flip));
+  transition: filter 0.6s ease;
+}
+
+/* ─── theme toggle ───────────────────────────────────────────────── */
+
+.theme {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 0.35s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme:hover, .theme:focus-visible { color: var(--ink); }
+
+/* the homepage has no bar to hold it, so it floats */
+.theme.floating {
+  position: fixed;
+  top: clamp(1rem, 2.5vw, 1.75rem);
+  right: clamp(1rem, 2.5vw, 1.75rem);
+  z-index: 2;
+}
+
+/* half-filled dial: it turns over when the theme does */
+.dial {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: linear-gradient(to right, currentColor 50%, transparent 50%);
+  transform: rotate(calc(var(--logo-flip) * 180deg));
+  transition: transform 0.9s var(--ease), border-color 0.35s ease;
+}
+
+/* ─── headings ───────────────────────────────────────────────────── */
+
+.name {
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.6rem, 1rem + 4vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.tagline {
+  margin: 0;
+  max-width: 40ch;
+  color: var(--ink-dim);
+  text-wrap: pretty;
+}
+.dim { color: var(--ink-faint); }
+
+/* The groups live inside one wrapper, so they miss out on the gap the page
+   gives its other children. Without this a heading sits right under the last
+   card's hairline and reads as part of the list above it. */
+.group + .group { margin-top: clamp(2.5rem, 5.5vh, 3.5rem); }
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.rule { flex: 1; height: 1px; background: var(--line); }
+.count { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+/* ─── tool cards ─────────────────────────────────────────────────── */
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  counter-reset: card;
+}
+
+.card {
+  position: relative;
+  counter-increment: card;
+  border-bottom: 1px solid var(--line);
+}
+
+/* the hairline under the hovered row draws itself left to right */
+.card::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ink), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s var(--ease);
+}
+
+.card a {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.15rem 1rem;
+  padding: 1.05rem 0.25rem;
+  transition: padding-left 0.5s var(--ease);
+}
+
+/* row number, slides in from the gutter */
+.card a::before {
+  content: counter(card, decimal-leading-zero);
+  position: absolute;
+  top: 1.05rem;
+  left: 0;
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  opacity: 0;
+  transform: translateX(-0.6rem);
+  transition: opacity 0.5s ease, transform 0.5s var(--ease);
+}
+
+.card-title { color: var(--ink); transition: color 0.4s ease; }
+.card-note {
+  grid-column: 1;
+  color: var(--ink-faint);
+  font-size: 0.85em;
+}
+.card-meta {
+  grid-row: 1;
+  grid-column: 2;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  transition: color 0.4s ease;
+}
+
+@media (hover: hover) {
+  .card a:hover { padding-left: 2.4rem; }
+  .card a:hover::before { opacity: 1; transform: none; }
+  .card a:hover .card-meta { color: var(--ink-dim); }
+  .card:hover::after { transform: scaleX(1); }
+}
+.card a:focus-visible { padding-left: 2.4rem; }
+.card a:focus-visible::before { opacity: 1; transform: none; }
+
+/* placeholders shouldn't pretend to be links */
+.card[data-soon] a { cursor: default; }
+.card[data-soon] .card-title { color: var(--ink-dim); }
+
+/* ─── homepage search ────────────────────────────────────────────── */
+
+.find {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.6rem;
+}
+.find-label { color: var(--ink-faint); font-size: 0.8rem; }
+.find input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  letter-spacing: inherit;
+}
+.find input::placeholder { color: var(--ink-faint); }
+.find input:focus { outline: none; }
+.find:focus-within { border-bottom-color: var(--ink-dim); }
+.find-count { color: var(--ink-faint); font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+
+.no-hits {
+  margin: 1.2rem 0 0;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+/* ─── foot ───────────────────────────────────────────────────────── */
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+.foot p { margin: 0; }
+.foot a { border-bottom: 1px solid var(--line); }
+.foot a:hover { border-bottom-color: var(--ink-dim); color: var(--ink-dim); }
+/* the claim in the footer is the whole point of the site — say it plainly */
+.vow { color: var(--ink-dim); }
+
+/* ─── entrance ───────────────────────────────────────────────────── */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+html.ready [data-reveal] {
+  animation: rise 1.1s var(--ease) forwards;
+  animation-delay: calc(var(--i, 0) * 110ms + 100ms);
+}
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+/* rows ease in as they scroll into view, where supported */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      animation: row-in linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+  }
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(1rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── mobile ─────────────────────────────────────────────────────── */
+
+@media (max-width: 34rem) {
+  .card a { padding: 0.95rem 0.15rem; }
+  .card a::before { top: 0.95rem; }
+  .card-meta { font-size: 0.65rem; }
+  .foot { flex-direction: column; }
+}
+
+/* no hover on touch: the row responds to the tap instead */
+@media (hover: none) {
+  .card a:active { padding-left: 2.4rem; }
+  .card a:active::before { opacity: 1; transform: none; }
+}
+
+/* ─── no-JS ──────────────────────────────────────────────────────── */
+
+html:not(.js) [data-reveal] { opacity: 1; transform: none; }
+html:not(.js) .needs-js { display: none; }
+
+.no-js-note {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--sunk);
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+}
+html.js .no-js-note { display: none; }
+
+/* ─── calm down if asked ─────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  body, .logo, .dial { transition-duration: 0.01ms; }
+  html.ready [data-reveal] { animation-duration: 0.01ms; animation-delay: 0s; }
+  .card a, .card::after, .card a::before { transition-duration: 0.01ms; }
+}

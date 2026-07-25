@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>regex — swiss-knife</title>
+<meta name="description" content="Test a regular expression in your browser: matches, capture groups, replace preview. Nothing is uploaded.">
+<meta name="theme-color" content="#0a0a0a">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+<link rel="stylesheet" href="/assets/tool.css">
+<script src="/assets/theme-init.js"></script>
+</head>
+<body data-tool="regex">
+
+<a class="skip" href="#pattern">skip to the pattern</a>
+
+<main class="wrap tool">
+
+  <header id="bar"></header>
+  <div id="tool-head"></div>
+
+  <p class="no-js-note">This tool is JavaScript — that is why it can run without a server. Enable it to continue.</p>
+
+  <div class="pattern-row needs-js">
+    <span class="slash">/</span>
+    <input id="pattern" type="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+           placeholder="\b(\w+)@(\w+\.\w+)\b" aria-label="Pattern">
+    <span class="slash">/</span>
+    <input id="flags" type="text" spellcheck="false" autocomplete="off" autocapitalize="off"
+           placeholder="gim" aria-label="Flags" maxlength="8">
+  </div>
+
+  <div class="toolbar needs-js">
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" data-view="matches" aria-pressed="true">matches</button>
+      <button type="button" data-view="groups" aria-pressed="false">groups</button>
+      <button type="button" data-view="replace" aria-pressed="false">replace</button>
+    </div>
+
+    <label class="field" id="replace-field" hidden>with
+      <input id="replacement" type="text" spellcheck="false" autocomplete="off"
+             placeholder="$1 or $&lt;name&gt;">
+    </label>
+
+    <span class="spacer"></span>
+
+    <div class="actions">
+      <button class="btn" type="button" id="sample">sample</button>
+      <button class="btn" type="button" id="copy">copy</button>
+      <button class="btn" type="button" id="clear">clear</button>
+    </div>
+  </div>
+
+  <div class="panes needs-js">
+    <section class="pane" id="in-pane" aria-label="Test text">
+      <div class="pane-head"><span>test text</span><span class="spacer"></span><span id="in-size"></span></div>
+      <div class="pane-body">
+        <textarea id="in" spellcheck="false" autocomplete="off" autocapitalize="off"
+                  placeholder="paste the text to run the pattern against"></textarea>
+      </div>
+    </section>
+
+    <section class="pane" aria-label="Result">
+      <div class="pane-head"><span id="out-label">matches</span><span class="spacer"></span><span id="hit-count"></span></div>
+      <div class="pane-body">
+        <div class="hl" id="hl" tabindex="0"></div>
+        <div class="scroller" id="groups-view" hidden></div>
+        <pre class="out wrap-on" id="replaced" hidden data-empty="the replaced text appears here" tabindex="0"></pre>
+      </div>
+    </section>
+  </div>
+
+  <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+
+  <details class="notes needs-js">
+    <summary>cheatsheet</summary>
+    <dl class="cheats">
+      <div><dt>\d \w \s</dt><dd>digit, word char, whitespace</dd></div>
+      <div><dt>\D \W \S</dt><dd>the negation of each</dd></div>
+      <div><dt>.</dt><dd>any char except a line break</dd></div>
+      <div><dt>[abc] [^abc]</dt><dd>one of, none of</dd></div>
+      <div><dt>a? a* a+</dt><dd>0-1, 0+, 1+</dd></div>
+      <div><dt>a{2,4}</dt><dd>between two and four</dd></div>
+      <div><dt>a+?</dt><dd>lazy — as few as possible</dd></div>
+      <div><dt>^ $</dt><dd>start, end (of line with m)</dd></div>
+      <div><dt>\b</dt><dd>word boundary</dd></div>
+      <div><dt>(…)</dt><dd>capture group, read as $1</dd></div>
+      <div><dt>(?:…)</dt><dd>group without capturing</dd></div>
+      <div><dt>(?&lt;n&gt;…)</dt><dd>named group, read as $&lt;n&gt;</dd></div>
+      <div><dt>(?=…) (?!…)</dt><dd>followed by, not followed by</dd></div>
+      <div><dt>(?&lt;=…) (?&lt;!…)</dt><dd>preceded by, not preceded by</dd></div>
+      <div><dt>a|b</dt><dd>either side</dd></div>
+      <div><dt>flag g</dt><dd>every match, not just the first</dd></div>
+      <div><dt>flag i</dt><dd>ignore case</dd></div>
+      <div><dt>flag m</dt><dd>^ and $ match each line</dd></div>
+      <div><dt>flag s</dt><dd>. also matches a line break</dd></div>
+      <div><dt>flag u</dt><dd>unicode mode, \p{…} works</dd></div>
+    </dl>
+  </details>
+
+  <footer id="foot"></footer>
+</main>
+
+<script src="/assets/registry.js"></script>
+<script src="/assets/chrome.js"></script>
+<script src="/assets/bytes.js" defer></script>
+<script src="/assets/ui.js" defer></script>
+<script src="/regex/regex.js" defer></script>
+<script src="/assets/theme.js" defer></script>
+</body>
+</html>

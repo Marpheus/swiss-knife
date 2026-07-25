@@ -1,0 +1,702 @@
+/* swiss-knife — the tool shell
+   One skeleton every tool borrows: bar, toolbar, panes, status line.
+   Tools that need something extra add it at the bottom of this file, not
+   in their own stylesheet — one file keeps them looking like siblings. */
+
+/* tool pages run wider than the homepage: two panes need the room */
+.wrap.tool {
+  max-width: 78rem;
+  justify-content: flex-start;
+  gap: clamp(1.25rem, 3vh, 1.75rem);
+  padding-top: clamp(1rem, 3vh, 1.75rem);
+}
+
+/* ─── top bar ────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.crumb { color: var(--ink-faint); transition: color 0.3s ease; }
+.crumb:hover { color: var(--ink); }
+.crumb-sep { color: var(--ink-faint); opacity: 0.6; }
+.crumb-now { color: var(--ink); }
+.bar .spacer { flex: 1; }
+
+/* the ⌘K affordance — a hint that happens to be a button */
+.jump {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.jump:hover { color: var(--ink); border-color: var(--ink-dim); }
+.jump kbd {
+  font: inherit;
+  font-size: 0.9em;
+  opacity: 0.75;
+}
+@media (max-width: 34rem) {
+  .jump .jump-word { display: none; }
+}
+
+/* ─── tool heading ───────────────────────────────────────────────── */
+
+.tool-head { display: flex; flex-direction: column; gap: 0.3rem; }
+.tool-name {
+  margin: 0;
+  font-size: clamp(1.25rem, 0.9rem + 1.6vw, 1.7rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.tool-note { margin: 0; color: var(--ink-faint); font-size: 0.85rem; }
+
+/* ─── toolbar ────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+.toolbar .spacer { flex: 1; min-width: 0; }
+/* the actions travel together when the bar has to wrap */
+.toolbar .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* a group of mutually exclusive modes, drawn as one strip */
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+}
+.seg button {
+  padding: 0.32rem 0.7rem;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+.seg button:last-child { border-right: 0; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] {
+  background: var(--raise);
+  color: var(--ink);
+}
+
+.btn {
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+.btn:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-dim); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+/* checkbox and its label behave as one target */
+.opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.25s ease;
+  user-select: none;
+}
+.opt:hover { color: var(--ink-dim); }
+.opt input { accent-color: var(--ink-dim); margin: 0; cursor: pointer; }
+
+.field {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+.field input, .field select {
+  border: 1px solid var(--line);
+  background: var(--sunk);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.4rem;
+}
+.field input { width: 4.5rem; }
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--ink-dim);
+}
+
+/* ─── the pattern line (regex) ───────────────────────────────────── */
+
+.pattern-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--sunk);
+}
+.pattern-row .slash { color: var(--ink-faint); }
+.pattern-row input {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  letter-spacing: 0;
+  min-width: 0;
+}
+.pattern-row input:focus { outline: none; }
+.pattern-row input::placeholder { color: var(--ink-faint); }
+#pattern { flex: 1; }
+#flags { width: 4.5rem; color: var(--ink-dim); }
+.pattern-row:focus-within { border-color: var(--ink-dim); }
+
+/* ─── the key line (jwt) ─────────────────────────────────────────── */
+
+.key-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--sunk);
+}
+.key-label {
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-top: 0.2rem;
+}
+.key-row textarea {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0;
+  resize: vertical;
+}
+.key-row textarea:focus { outline: none; }
+.key-row textarea::placeholder { color: var(--ink-faint); }
+.key-row:focus-within { border-color: var(--ink-dim); }
+
+/* ─── panes ──────────────────────────────────────────────────────── */
+
+.panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  /* the grid gap is the divider; panes paint over it */
+  min-height: min(60vh, 34rem);
+}
+.panes.single { grid-template-columns: 1fr; }
+/* for pages where the panes are the input and the answer is below them */
+.panes.short { min-height: min(30vh, 17rem); }
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* fixed, so a header with a button in it lines up with one without */
+  min-height: 2.1rem;
+  padding: 0.2rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--sunk);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.pane-head .spacer { flex: 1; }
+/* small icon-ish actions living in a pane header */
+.pane-head .btn {
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.pane-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* the editors. monospace already; just needs to get out of the way. */
+.pane textarea,
+.pane .out {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 0.9rem;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  letter-spacing: 0;
+  tab-size: 2;
+  resize: none;
+  overflow: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+.pane textarea::placeholder { color: var(--ink-faint); }
+.pane textarea:focus { outline: none; }
+.pane textarea.wrap-on,
+.pane .out.wrap-on { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* the line-number gutter. its font size, line height and top padding have to
+   match the text beside it exactly or the numbers drift down the page. */
+/* Taken out of the flow on purpose. In the flow its content is thousands of
+   lines tall, and a grid item sized to its content would stretch the pane —
+   and with it the page — instead of letting the text scroll inside. The
+   width is set from script, since it depends on how many digits there are. */
+.gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  min-width: 2.9rem;
+  padding: 0.85rem 0.55rem 0.85rem 0.5rem;
+  border-right: 1px solid var(--line);
+  background: var(--sunk);
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-align: right;
+  overflow: hidden;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.gutter.clickable { cursor: pointer; }
+.gutter.clickable:hover { color: var(--ink-dim); }
+
+/* one text run, so its lines round exactly as the text beside it does */
+.gnums { white-space: pre; }
+
+/* Drawn over the number of the offending line. Opaque, because the plain
+   number underneath would otherwise show through; the inset shadow tints it
+   without covering the digits, which a pseudo-element would. */
+.gbad {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 0 0.55rem 0 0.5rem;
+  color: var(--err);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2rem color-mix(in srgb, var(--err) 18%, transparent);
+}
+
+.pane .out { user-select: text; }
+.pane .out:empty::before {
+  content: attr(data-empty);
+  color: var(--ink-faint);
+}
+
+/* dragging a file anywhere over an input pane */
+.pane.dropping::after {
+  content: "drop to load";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  border: 1px dashed var(--ink-dim);
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 52rem) {
+  .panes { grid-template-columns: 1fr; min-height: 0; }
+  .pane { min-height: 14rem; }
+}
+
+/* ─── status line ────────────────────────────────────────────────── */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.1rem;
+  min-height: 1.5rem;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+}
+.status .msg { display: flex; align-items: baseline; gap: 0.45rem; }
+.status .msg::before {
+  content: "";
+  align-self: center;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+.status .msg.ok  { color: var(--ok); }
+.status .msg.err { color: var(--err); }
+.status .stat { font-variant-numeric: tabular-nums; }
+.status .stat b { font-weight: 500; color: var(--ink-dim); }
+
+/* ─── key/value readouts (jwt claims, regex groups, …) ───────────── */
+
+.kv {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.kv th, .kv td {
+  padding: 0.35rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.kv th {
+  font-weight: 500;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+.kv td { color: var(--ink); overflow-wrap: anywhere; }
+.kv td.k { color: var(--ink-dim); white-space: nowrap; }
+.kv tbody tr:last-child td { border-bottom: 0; }
+.kv .muted { color: var(--ink-faint); }
+
+.scroller { overflow: auto; flex: 1; min-height: 0; width: 100%; }
+
+/* ─── badges ─────────────────────────────────────────────────────── */
+
+.tag {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--line);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.tag.ok  { color: var(--ok);  border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.tag.err { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, var(--line)); }
+
+/* ─── command palette ────────────────────────────────────────────── */
+
+.palette {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: clamp(3rem, 14vh, 9rem) 1rem 1rem;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.palette-box {
+  width: min(34rem, 100%);
+  max-height: min(60vh, 28rem);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  animation: pop 0.25s var(--ease);
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+.palette input {
+  padding: 0.8rem 0.95rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+}
+.palette input:focus { outline: none; }
+.palette input::placeholder { color: var(--ink-faint); }
+
+.palette ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem 0;
+  overflow: auto;
+}
+.palette li > * {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.45rem 0.95rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+.palette li[aria-selected="true"] > * { background: var(--raise); }
+.palette li .p-note {
+  flex: 1;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.palette li[data-soon] > * { cursor: default; color: var(--ink-dim); }
+.palette .p-none { padding: 0.9rem 0.95rem; color: var(--ink-faint); font-size: 0.8rem; }
+
+/* ─── toast ──────────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 40;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-dim);
+  font-size: 0.76rem;
+  transform: translate(-50%, 1rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease);
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ─── tool-specific bits ─────────────────────────────────────────── */
+
+/* json — the collapsible tree */
+.tree {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.85rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.tree ul { list-style: none; margin: 0; padding-left: 1.1rem; }
+.tree > ul { padding-left: 0; }
+.tree li { position: relative; }
+.tree details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.tree details > summary::-webkit-details-marker { display: none; }
+.tree details > summary::before {
+  content: "+";
+  width: 0.8em;
+  color: var(--ink-faint);
+}
+.tree details[open] > summary::before { content: "−"; }
+.tree .jkey { color: var(--ink-dim); }
+.tree .jstr { color: var(--ink); }
+.tree .jnum, .tree .jbool, .tree .jnull { color: var(--ink-dim); font-style: italic; }
+.tree .jmeta { color: var(--ink-faint); font-size: 0.9em; }
+
+/* regex — match highlighting rendered as a text overlay */
+.hl {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.85rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.hl mark {
+  background: var(--raise);
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink-dim);
+  border-radius: 1px;
+}
+.hl mark.alt { background: transparent; border-bottom-style: dashed; }
+
+/* diff — one row per line, gutters carry the line numbers */
+.diff {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.diff .row {
+  display: grid;
+  grid-template-columns: 3.2rem 3.2rem 1fr;
+  border-bottom: 1px solid transparent;
+}
+.diff.split .row { grid-template-columns: 3.2rem minmax(0, 1fr) 3.2rem minmax(0, 1fr); }
+.diff .ln {
+  padding: 0 0.5rem;
+  color: var(--ink-faint);
+  text-align: right;
+  font-size: 0.72rem;
+  user-select: none;
+  background: var(--sunk);
+  border-right: 1px solid var(--line);
+}
+.diff .tx {
+  padding: 0 0.6rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* unified marks the whole row; side by side marks the one cell */
+.diff .row.add, .diff .tx.add { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.diff .row.del, .diff .tx.del { background: color-mix(in srgb, var(--err) 12%, transparent); }
+.diff .row.add .tx::before { content: "+ "; color: var(--ok); }
+.diff .row.del .tx::before { content: "− "; color: var(--err); }
+.diff .row.eq  .tx::before { content: "  "; }
+
+/* word mode is one flowing block rather than a grid of rows */
+.diff .wordflow {
+  padding: 0.7rem 0.9rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.diff .gap {
+  padding: 0.2rem 0.6rem;
+  color: var(--ink-faint);
+  background: var(--sunk);
+  font-size: 0.72rem;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+/* word-level emphasis inside a changed line */
+.diff ins, .diff del {
+  text-decoration: none;
+  border-radius: 1px;
+  padding: 0 0.05em;
+}
+.diff ins { background: color-mix(in srgb, var(--ok) 26%, transparent); }
+.diff del { background: color-mix(in srgb, var(--err) 26%, transparent); }
+.diff .void { background: var(--sunk); }
+
+/* jwt — the three parts, coloured only by weight */
+.jwt-raw {
+  padding: 0.85rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.jwt-raw .p1 { color: var(--ink); }
+.jwt-raw .p2 { color: var(--ink-dim); }
+.jwt-raw .p3 { color: var(--ink-faint); }
+.jwt-raw .dot { color: var(--err); }
+
+.stack { display: flex; flex-direction: column; min-height: 0; }
+.stack > .block { border-bottom: 1px solid var(--line); }
+.stack > .block:last-child { border-bottom: 0; }
+.block-head {
+  padding: 0.35rem 0.7rem;
+  background: var(--sunk);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.block pre {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* base64 — the file readout */
+.filebar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+.filebar .fname { color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* a short reference list, e.g. the regex cheatsheet */
+.notes { border-top: 1px solid var(--line); }
+.notes summary {
+  padding: 0.6rem 0.1rem;
+  cursor: pointer;
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  list-style: none;
+}
+.notes summary::-webkit-details-marker { display: none; }
+.notes summary::before { content: "+ "; }
+.notes[open] summary::before { content: "− "; }
+.notes summary:hover { color: var(--ink-dim); }
+.cheats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.2rem 1.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  font-size: 0.78rem;
+}
+.cheats div { display: flex; gap: 0.6rem; }
+.cheats dt { color: var(--ink); min-width: 4.5rem; }
+.cheats dd { margin: 0; color: var(--ink-faint); }
