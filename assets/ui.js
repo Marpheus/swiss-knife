@@ -344,29 +344,21 @@ SK.ui = (function () {
         return (t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || ''))
           .toLowerCase().indexOf(query) !== -1;
       });
-      /* live tools first, otherwise registry order */
-      hits.sort(function (a, b) {
-        return (a.status === 'live' ? 0 : 1) - (b.status === 'live' ? 0 : 1);
-      });
       cursor = 0;
       if (!hits.length) {
         list.innerHTML = '<li class="p-none">nothing matches</li>';
         return;
       }
       list.innerHTML = hits.map(function (t, i) {
-        var inner = t.status === 'live'
-          ? '<a href="/' + esc(t.slug) + '/">' + row(t) + '</a>'
-          : '<span>' + row(t) + '</span>';
-        return '<li role="option" aria-selected="' + (i === 0) + '"' +
-               (t.status === 'live' ? '' : ' data-soon') + '>' + inner + '</li>';
+        return '<li role="option" aria-selected="' + (i === 0) + '">' +
+               '<a href="/' + esc(t.slug) + '/">' + row(t) + '</a></li>';
       }).join('');
       mark();
     }
 
     function row(t) {
       return '<span class="p-name">' + esc(t.name) + '</span>' +
-             '<span class="p-note">' + esc(t.note) + '</span>' +
-             (t.status === 'live' ? '' : '<span class="tag">soon</span>');
+             '<span class="p-note">' + esc(t.note) + '</span>';
     }
 
     function mark() {
@@ -392,8 +384,7 @@ SK.ui = (function () {
 
     function go() {
       var t = hits[cursor];
-      if (t && t.status === 'live') location.href = '/' + t.slug + '/';
-      else if (t) toast(t.name + ' — not built yet');
+      if (t) location.href = '/' + t.slug + '/';
     }
 
     input.addEventListener('input', function () { render(input.value); });
@@ -417,10 +408,6 @@ SK.ui = (function () {
       if (!li || !li.parentNode) return;
       var i = Array.prototype.indexOf.call(list.children, li);
       if (i >= 0 && i !== cursor) { cursor = i; mark(); }
-    });
-
-    list.addEventListener('click', function (e) {
-      if (e.target.closest('li[data-soon]')) { e.preventDefault(); go(); }
     });
 
     return { open: open, close: close, el: el };

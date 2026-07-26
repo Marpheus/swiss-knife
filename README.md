@@ -56,8 +56,8 @@ json/ regex/ base64/ jwt/ diff/
 
 ## adding a tool
 
-1. Flip its entry in `assets/registry.js` from `status: 'soon'` to `'live'`
-   (or add one). The homepage and the ⌘K palette pick it up immediately.
+1. Add an entry to `assets/registry.js`. The homepage and the ⌘K palette pick
+   it up immediately.
 2. Copy the closest existing `index.html`. Keep the CSP block, the
    `#bar` / `#tool-head` / `#foot` placeholders and the script order —
    `registry.js` and `chrome.js` load synchronously so the header is there
@@ -67,8 +67,6 @@ json/ regex/ base64/ jwt/ diff/
 
 Shared looks belong in `assets/tool.css`, not in a per-tool stylesheet — that
 is what keeps the set looking like one set.
-
-`ROADMAP.md` has the queue.
 
 ## testing
 

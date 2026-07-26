@@ -491,7 +491,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.palette li[data-soon] > * { cursor: default; color: var(--ink-dim); }
 .palette .p-none { padding: 0.9rem 0.95rem; color: var(--ink-faint); font-size: 0.8rem; }
 
 /* ─── toast ──────────────────────────────────────────────────────── */

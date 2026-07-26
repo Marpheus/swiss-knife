@@ -1,5 +1,5 @@
-/* The homepage: one section per group, one row per tool, plus a filter.
-   Runs before theme.js so the generated sections take part in the stagger. */
+/* The homepage: one row per tool, plus a filter.
+   Runs before theme.js so the generated list takes part in the stagger. */
 (function () {
   var esc = function (s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -7,38 +7,20 @@
     });
   };
 
-  var host = document.getElementById('groups');
+  var host = document.getElementById('tools');
   if (!host || !window.SK) return;
 
-  host.innerHTML = SK.groups.map(function (g) {
-    var tools = SK.tools.filter(function (t) { return t.group === g.id; });
-    if (!tools.length) return '';
-    var live = tools.filter(function (t) { return t.status === 'live'; }).length;
-
-    return '<section class="group" data-reveal data-group="' + esc(g.id) + '">' +
-      '<h2 class="section-title">' +
-        '<span>' + esc(g.title) + '</span>' +
-        '<span class="rule" aria-hidden="true"></span>' +
-        '<span class="count">' + pad(live) + '/' + pad(tools.length) + '</span>' +
-      '</h2>' +
-      '<ul class="cards">' + tools.map(card).join('') + '</ul>' +
-    '</section>';
-  }).join('');
+  host.innerHTML = '<ul class="cards" data-reveal>' +
+    SK.tools.map(card).join('') + '</ul>';
 
   function card(t) {
-    var soon = t.status !== 'live';
-    /* no href on the unbuilt ones: they shouldn't be focusable or clickable */
-    var open = soon ? '<a aria-disabled="true">' : '<a href="/' + esc(t.slug) + '/">';
-    return '<li class="card"' + (soon ? ' data-soon' : '') +
+    return '<li class="card"' +
       ' data-hay="' + esc((t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || '')).toLowerCase()) + '">' +
-      open +
+      '<a href="/' + esc(t.slug) + '/">' +
         '<span class="card-title">' + esc(t.name) + '</span>' +
         '<span class="card-note">' + esc(t.note) + '</span>' +
-        '<span class="card-meta">' + (soon ? 'soon' : 'live') + '</span>' +
       '</a></li>';
   }
-
-  function pad(n) { return String(n).padStart(2, '0'); }
 
   /* ── filter ──────────────────────────────────────────────────── */
 
@@ -46,7 +28,6 @@
   var counter = document.getElementById('find-count');
   var none = document.getElementById('no-hits');
   var cards = Array.from(host.querySelectorAll('.card'));
-  var sections = Array.from(host.querySelectorAll('.group'));
 
   function filter() {
     var q = input.value.trim().toLowerCase();
@@ -56,11 +37,6 @@
       var hit = !q || li.dataset.hay.indexOf(q) !== -1;
       li.hidden = !hit;
       if (hit) shown++;
-    });
-
-    /* a section with nothing left in it goes too */
-    sections.forEach(function (s) {
-      s.hidden = !s.querySelector('.card:not([hidden])');
     });
 
     none.hidden = shown > 0;
@@ -83,10 +59,10 @@
     }
   });
 
-  /* ↵ in the filter opens the first live hit */
+  /* ↵ in the filter opens the first hit */
   input.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter') return;
-    var first = host.querySelector('.card:not([hidden]):not([data-soon]) a[href]');
+    var first = host.querySelector('.card:not([hidden]) a[href]');
     if (first) location.href = first.getAttribute('href');
   });
 })();

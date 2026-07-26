@@ -187,25 +187,6 @@ a { color: inherit; text-decoration: none; }
 }
 .dim { color: var(--ink-faint); }
 
-/* The groups live inside one wrapper, so they miss out on the gap the page
-   gives its other children. Without this a heading sits right under the last
-   card's hairline and reads as part of the list above it. */
-.group + .group { margin-top: clamp(2.5rem, 5.5vh, 3.5rem); }
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 0 0 1.4rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ink-dim);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.rule { flex: 1; height: 1px; background: var(--line); }
-.count { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
-
 /* ─── tool cards ─────────────────────────────────────────────────── */
 
 .cards {
@@ -237,7 +218,7 @@ a { color: inherit; text-decoration: none; }
 .card a {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: baseline;
   gap: 0.15rem 1rem;
   padding: 1.05rem 0.25rem;
@@ -263,28 +244,13 @@ a { color: inherit; text-decoration: none; }
   color: var(--ink-faint);
   font-size: 0.85em;
 }
-.card-meta {
-  grid-row: 1;
-  grid-column: 2;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  transition: color 0.4s ease;
-}
-
 @media (hover: hover) {
   .card a:hover { padding-left: 2.4rem; }
   .card a:hover::before { opacity: 1; transform: none; }
-  .card a:hover .card-meta { color: var(--ink-dim); }
   .card:hover::after { transform: scaleX(1); }
 }
 .card a:focus-visible { padding-left: 2.4rem; }
 .card a:focus-visible::before { opacity: 1; transform: none; }
-
-/* placeholders shouldn't pretend to be links */
-.card[data-soon] a { cursor: default; }
-.card[data-soon] .card-title { color: var(--ink-dim); }
 
 /* ─── homepage search ────────────────────────────────────────────── */
 
@@ -368,7 +334,6 @@ html.ready [data-reveal] {
 @media (max-width: 34rem) {
   .card a { padding: 0.95rem 0.15rem; }
   .card a::before { top: 0.95rem; }
-  .card-meta { font-size: 0.65rem; }
   .foot { flex-direction: column; }
 }
 
