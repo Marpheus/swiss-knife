@@ -1,8 +1,11 @@
 # tools
 
-Text and data tools that run entirely in the browser, in the same visual
-language as [marpheus.dev](https://marpheus.dev). Meant for
-`tools.marpheus.dev`.
+[![CI](https://github.com/Marpheus/swiss-knife/actions/workflows/ci.yml/badge.svg)](https://github.com/Marpheus/swiss-knife/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+Text and data tools that run entirely in the browser, live at
+[tools.marpheus.dev](https://tools.marpheus.dev) and in the same visual
+language as [marpheus.dev](https://marpheus.dev).
 
 The point is the thing CyberChef and jwt.io cannot offer: a JWT, a payload or
 a log pasted here is never uploaded, because the page is technically incapable
@@ -16,23 +19,73 @@ so `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon` and remote
 scripts/images are refused by the browser itself. Open DevTools and try —
 each one raises a `securitypolicyviolation`.
 
-## running it
+<!-- screenshot: add one at docs/screenshot.png and uncomment
+![The json tool](docs/screenshot.png)
+-->
 
-No build, no dependencies, no backend. Any static server will do:
+## features
+
+- **json**: format (2, 4 or tab indent), minify, sort keys, browse as a
+  tree, and convert to and from a JSON string. When the input is invalid, a
+  hand-written scanner finds the fault and marks the line in the gutter.
+- **regex**: matches, capture groups and a replace preview. Matching runs
+  in a worker that is killed after 1.5 s, so a catastrophically backtracking
+  pattern cannot hang the tab.
+- **base64**: text and files, UTF-8 safe, with options for URL-safe output,
+  76-column wrapping and data URIs. PNG, JPEG, GIF, PDF, zip and gzip results
+  are recognised by their magic bytes and offered as a download.
+- **jwt**: claims with readable dates, expiry and not-before checks, and
+  signature verification for HS, RS, PS and ES at 256/384/512 through
+  WebCrypto. The key can be a secret (optionally base64), a PEM public key or
+  a JWK. The key is never remembered.
+- **diff**: by line or by word, unified or side by side, with ignore
+  whitespace, ignore case, and a unified patch to copy. It uses Myers,
+  written out in `assets/myers.js`.
+
+Across all of them: ⌘K / Ctrl+K opens a palette of tools, a file can be
+dropped onto the input, results copy with one click (json and base64 also
+download), there is a light and a dark theme, and what you type is kept in
+`localStorage` per tool (up to 200,000 characters per field) so a reload
+loses nothing. It never leaves the browser.
+
+## tech stack
+
+Plain HTML, CSS and JavaScript. No framework, no build step, no runtime
+dependencies and no backend. Browser APIs do the heavy lifting: WebCrypto for
+signatures, a Web Worker for regex, and `TextEncoder`/`TextDecoder` for
+bytes. ESLint and Prettier are dev-only tooling. Nothing they install is
+served.
+
+## getting started
+
+Any static server will do. Paths are absolute, so serve from the folder root:
 
 ```sh
-python3 -m http.server 8080
+npm start                 # python3 -m http.server 8080
 ```
+
+For the tooling you need Node (version in `.nvmrc`):
+
+```sh
+npm ci
+npm run lint              # ESLint
+npm run format            # Prettier, rewriting files
+npm run format:check      # Prettier, checking only (what CI runs)
+npm test                  # the Myers diff against a brute-force LCS
+```
+
+CI runs lint, the format check and the tests on every push and pull request.
 
 ## deploying
 
-Upload the folder. The only requirements are that `/` serves `index.html`,
-that `404.html` is wired up as the not-found page, and that it is served from
-a domain root (paths are absolute, e.g. `/assets/base.css`), which a subdomain
-gives you.
+The repository is the site. `netlify.toml` publishes it as is with the CSP
+and the other security headers sent as real headers, and returns 404 for the
+files that only belong to the repo (tests, README, tooling).
 
-Serve `.js` and `.css` with a normal cache header and the HTML with a short
-one; there are no hashed filenames.
+Anywhere else, the requirements are that `/` serves `index.html`, that
+`404.html` is wired up as the not-found page, and that it is served from a
+domain root, which a subdomain gives you. Filenames carry no content hash,
+so serve everything with a revalidating cache header.
 
 ## layout
 
@@ -52,6 +105,7 @@ assets/
   theme.js            the toggle and the entrance animation
   home.js             the homepage list and its filter
 json/ regex/ base64/ jwt/ diff/
+test/                 node tests, not served
 ```
 
 ## adding a tool
@@ -68,11 +122,13 @@ json/ regex/ base64/ jwt/ diff/
 Shared looks belong in `assets/tool.css`, not in a per-tool stylesheet — that
 is what keeps the set looking like one set.
 
-## testing
+## credits
 
-The parts worth checking are the ones with an algorithm behind them. The diff
-is verified against a brute-force LCS on random inputs:
+No third-party code ships with the site. The diff follows Eugene W. Myers,
+[_An O(ND) Difference Algorithm and Its Variations_](https://doi.org/10.1007/BF01840446)
+(Algorithmica, 1986). Linting and formatting by [ESLint](https://eslint.org)
+and [Prettier](https://prettier.io).
 
-```sh
-node test/myers.test.js
-```
+## license
+
+[MIT](LICENSE)
