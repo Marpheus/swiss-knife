@@ -5,28 +5,30 @@
    handing it over, and the usual advice is to never do it. Here the token,
    the secret and the key all stay in the page. */
 (function () {
-  var ui = SK.ui, B = SK.bytes;
+  var ui = SK.ui,
+    B = SK.bytes;
   var $ = ui.$;
 
   var els = {
-    input:  $('#in'),
-    out:    $('#decoded'),
-    key:    $('#key'),
+    input: $('#in'),
+    out: $('#decoded'),
+    key: $('#key'),
     keyRow: $('#key-row'),
     verify: $('#verify'),
     b64secret: $('#b64secret'),
     b64opt: $('#b64secret-opt'),
-    alg:    $('#alg-tag'),
-    size:   $('#in-size')
+    alg: $('#alg-tag'),
+    size: $('#in-size')
   };
 
   var store = ui.store('jwt');
   var status = ui.status($('#status'));
   var payloadText = '';
-  var runId = 0;   /* verification is async; only the latest run may report */
+  var runId = 0; /* verification is async; only the latest run may report */
 
   /* a token signed with the secret "tools", so verify can be tried out */
-  var SAMPLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+  var SAMPLE =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
     'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ik1hcm9zIiwicm9sZSI6WyJhZG1pbiJdLCJpYXQiOjE3ODI4OTcxMjAsImV4cCI6MTc5ODc5NDcyMH0.' +
     'SUsxd9MzKplLPT5l5hGkvxGX0bTJYg1qWFgeWNKB7t0';
 
@@ -48,14 +50,19 @@
     }
 
     /* tolerate what people actually paste */
-    var token = raw.replace(/^["']|["']$/g, '').replace(/^Bearer\s+/i, '').replace(/\s+/g, '');
+    var token = raw
+      .replace(/^["']|["']$/g, '')
+      .replace(/^Bearer\s+/i, '')
+      .replace(/\s+/g, '');
     var parts = token.split('.');
 
     if (parts.length !== 3) {
       els.out.innerHTML = '';
-      status.err(parts.length < 3
-        ? 'a jwt has three dot-separated parts — this has ' + parts.length
-        : 'too many dots — this is not a jwt');
+      status.err(
+        parts.length < 3
+          ? 'a jwt has three dot-separated parts — this has ' + parts.length
+          : 'too many dots — this is not a jwt'
+      );
       status.stats({});
       return;
     }
@@ -100,7 +107,10 @@
     } else if (life.notYet) {
       base = { kind: 'err', text: 'not valid yet — nbf is ' + life.nbfIn };
     } else {
-      base = { kind: 'ok', text: 'decoded' + (life.expiresIn ? ' — expires ' + life.expiresIn : '') };
+      base = {
+        kind: 'ok',
+        text: 'decoded' + (life.expiresIn ? ' — expires ' + life.expiresIn : '')
+      };
     }
     say(base, null);
 
@@ -114,8 +124,12 @@
   var base = null;
 
   function say(head, tail) {
-    var kind = (head && head.kind === 'err') || (tail && tail.kind === 'err') ? 'err'
-      : (head && head.kind === 'ok') && (!tail || tail.kind === 'ok') ? 'ok' : '';
+    var kind =
+      (head && head.kind === 'err') || (tail && tail.kind === 'err')
+        ? 'err'
+        : head && head.kind === 'ok' && (!tail || tail.kind === 'ok')
+          ? 'ok'
+          : '';
     var text = [head && head.text, tail && tail.text].filter(Boolean).join('  ·  ');
     kind === 'err' ? status.err(text) : kind === 'ok' ? status.ok(text) : status.info(text);
   }
@@ -133,39 +147,61 @@
   }
 
   function block(title, body) {
-    return '<div class="block"><div class="block-head">' + ui.esc(title) + '</div>' +
-           '<pre>' + ui.esc(body) + '</pre></div>';
+    return (
+      '<div class="block"><div class="block-head">' +
+      ui.esc(title) +
+      '</div>' +
+      '<pre>' +
+      ui.esc(body) +
+      '</pre></div>'
+    );
   }
 
   /* the claims that mean something specific, spelled out */
   var KNOWN = {
-    iss: 'issuer', sub: 'subject', aud: 'audience', exp: 'expires',
-    nbf: 'not before', iat: 'issued at', jti: 'jwt id',
-    azp: 'authorised party', scope: 'scope', client_id: 'client'
+    iss: 'issuer',
+    sub: 'subject',
+    aud: 'audience',
+    exp: 'expires',
+    nbf: 'not before',
+    iat: 'issued at',
+    jti: 'jwt id',
+    azp: 'authorised party',
+    scope: 'scope',
+    client_id: 'client'
   };
   var TIME_CLAIMS = ['exp', 'nbf', 'iat', 'auth_time', 'updated_at'];
 
   function claims(payload) {
-    var rows = Object.keys(payload).map(function (k) {
-      var v = payload[k];
-      var note = KNOWN[k] ? '<span class="muted"> — ' + KNOWN[k] + '</span>' : '';
-      var val;
+    var rows = Object.keys(payload)
+      .map(function (k) {
+        var v = payload[k];
+        var note = KNOWN[k] ? '<span class="muted"> — ' + KNOWN[k] + '</span>' : '';
+        var val;
 
-      if (TIME_CLAIMS.indexOf(k) !== -1 && typeof v === 'number') {
-        var d = new Date(v * 1000);
-        val = isNaN(d) ? ui.esc(String(v))
-          : ui.esc(d.toISOString().replace('T', ' ').replace('.000Z', ' UTC')) +
-            ' <span class="muted">(' + ui.esc(relative(d)) + ')</span>';
-      } else if (typeof v === 'object' && v !== null) {
-        val = ui.esc(JSON.stringify(v));
-      } else {
-        val = ui.esc(String(v));
-      }
-      return '<tr><td class="k">' + ui.esc(k) + note + '</td><td>' + val + '</td></tr>';
-    }).join('');
+        if (TIME_CLAIMS.indexOf(k) !== -1 && typeof v === 'number') {
+          var d = new Date(v * 1000);
+          val = isNaN(d)
+            ? ui.esc(String(v))
+            : ui.esc(d.toISOString().replace('T', ' ').replace('.000Z', ' UTC')) +
+              ' <span class="muted">(' +
+              ui.esc(relative(d)) +
+              ')</span>';
+        } else if (typeof v === 'object' && v !== null) {
+          val = ui.esc(JSON.stringify(v));
+        } else {
+          val = ui.esc(String(v));
+        }
+        return '<tr><td class="k">' + ui.esc(k) + note + '</td><td>' + val + '</td></tr>';
+      })
+      .join('');
 
-    return '<div class="block"><div class="block-head">claims</div>' +
-           '<table class="kv"><tbody>' + rows + '</tbody></table></div>';
+    return (
+      '<div class="block"><div class="block-head">claims</div>' +
+      '<table class="kv"><tbody>' +
+      rows +
+      '</tbody></table></div>'
+    );
   }
 
   function lifetime(payload) {
@@ -173,20 +209,30 @@
     var out = { expired: false, notYet: false, expiresIn: '', expiredAgo: '', nbfIn: '' };
     if (typeof payload.exp === 'number') {
       var exp = new Date(payload.exp * 1000);
-      if (exp.getTime() <= now) { out.expired = true; out.expiredAgo = relative(exp); }
-      else out.expiresIn = relative(exp);
+      if (exp.getTime() <= now) {
+        out.expired = true;
+        out.expiredAgo = relative(exp);
+      } else out.expiresIn = relative(exp);
     }
     if (typeof payload.nbf === 'number') {
       var nbf = new Date(payload.nbf * 1000);
-      if (nbf.getTime() > now) { out.notYet = true; out.nbfIn = relative(nbf); }
+      if (nbf.getTime() > now) {
+        out.notYet = true;
+        out.nbfIn = relative(nbf);
+      }
     }
     return out;
   }
 
   var RELATIVE = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
   var UNITS = [
-    ['year', 31536000000], ['month', 2592000000], ['week', 604800000],
-    ['day', 86400000], ['hour', 3600000], ['minute', 60000], ['second', 1000]
+    ['year', 31536000000],
+    ['month', 2592000000],
+    ['week', 604800000],
+    ['day', 86400000],
+    ['hour', 3600000],
+    ['minute', 60000],
+    ['second', 1000]
   ];
 
   function relative(date) {
@@ -240,28 +286,40 @@
       return;
     }
 
-    importKey(spec, keyText).then(function (key) {
-      var params = spec.name === 'RSA-PSS' ? { name: 'RSA-PSS', saltLength: spec.salt }
-        : spec.name === 'ECDSA' ? { name: 'ECDSA', hash: spec.hash }
-        : { name: spec.name };
-      return crypto.subtle.verify(params, key, sig, signed);
-    }).then(function (ok) {
-      note(id, ok ? 'ok' : 'err',
-        ok ? 'signature verified — ' + alg : 'signature does NOT match this key');
-    }).catch(function (e) {
-      note(id, 'err', 'could not verify — ' + (e.message || e));
-    });
+    importKey(spec, keyText)
+      .then(function (key) {
+        var params =
+          spec.name === 'RSA-PSS'
+            ? { name: 'RSA-PSS', saltLength: spec.salt }
+            : spec.name === 'ECDSA'
+              ? { name: 'ECDSA', hash: spec.hash }
+              : { name: spec.name };
+        return crypto.subtle.verify(params, key, sig, signed);
+      })
+      .then(function (ok) {
+        note(
+          id,
+          ok ? 'ok' : 'err',
+          ok ? 'signature verified — ' + alg : 'signature does NOT match this key'
+        );
+      })
+      .catch(function (e) {
+        note(id, 'err', 'could not verify — ' + (e.message || e));
+      });
   }
 
   function importKey(spec, keyText) {
     if (spec.name === 'HMAC') {
       var raw = els.b64secret.checked ? B.fromBase64(keyText) : B.fromText(keyText);
-      return crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: spec.hash }, false, ['verify']);
+      return crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: spec.hash }, false, [
+        'verify'
+      ]);
     }
 
-    var algo = spec.name === 'ECDSA'
-      ? { name: 'ECDSA', namedCurve: spec.curve }
-      : { name: spec.name, hash: spec.hash };
+    var algo =
+      spec.name === 'ECDSA'
+        ? { name: 'ECDSA', namedCurve: spec.curve }
+        : { name: spec.name, hash: spec.hash };
 
     if (keyText[0] === '{') {
       var jwk = JSON.parse(keyText);
@@ -269,10 +327,14 @@
     }
 
     if (/BEGIN CERTIFICATE/.test(keyText)) {
-      return Promise.reject(new Error('that is a certificate — paste the public key inside it (BEGIN PUBLIC KEY)'));
+      return Promise.reject(
+        new Error('that is a certificate — paste the public key inside it (BEGIN PUBLIC KEY)')
+      );
     }
     if (/BEGIN RSA PUBLIC KEY/.test(keyText)) {
-      return Promise.reject(new Error('that is a PKCS#1 key — convert it to PKCS#8 (BEGIN PUBLIC KEY)'));
+      return Promise.reject(
+        new Error('that is a PKCS#1 key — convert it to PKCS#8 (BEGIN PUBLIC KEY)')
+      );
     }
     if (/PRIVATE KEY/.test(keyText)) {
       return Promise.reject(new Error('that is a private key — verification wants the public one'));
@@ -294,10 +356,13 @@
   /* ── wiring ──────────────────────────────────────────────────── */
 
   els.input.addEventListener('input', ui.debounce(run, 120));
-  els.key.addEventListener('input', ui.debounce(function () {
-    /* the key is a secret; it is deliberately not remembered between visits */
-    run();
-  }, 200));
+  els.key.addEventListener(
+    'input',
+    ui.debounce(function () {
+      /* the key is a secret; it is deliberately not remembered between visits */
+      run();
+    }, 200)
+  );
 
   els.verify.addEventListener('change', function () {
     els.keyRow.hidden = !els.verify.checked;
@@ -320,7 +385,9 @@
     run();
   });
 
-  $('#copy').addEventListener('click', function () { ui.copy(payloadText); });
+  $('#copy').addEventListener('click', function () {
+    ui.copy(payloadText);
+  });
   $('#clear').addEventListener('click', function () {
     els.input.value = '';
     els.key.value = '';
@@ -330,12 +397,17 @@
   });
 
   ui.acceptDrop($('#in-pane'), function (file) {
-    ui.readText(file).then(function (t) { els.input.value = t.trim(); run(); });
+    ui.readText(file).then(function (t) {
+      els.input.value = t.trim();
+      run();
+    });
   });
 
   ui.keys({
     'mod+enter': run,
-    'mod+shift+c': function () { ui.copy(payloadText); }
+    'mod+shift+c': function () {
+      ui.copy(payloadText);
+    }
   });
 
   /* ── restore ─────────────────────────────────────────────────── */

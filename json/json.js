@@ -5,36 +5,41 @@
    one we walk it ourselves (see scan) to find out where and why, then mark
    that line in the gutter. */
 (function () {
-  var ui = SK.ui, B = SK.bytes;
+  var ui = SK.ui,
+    B = SK.bytes;
   var $ = ui.$;
 
   var els = {
-    input:   $('#in'),
-    out:     $('#out'),
-    tree:    $('#tree'),
-    label:   $('#out-label'),
-    indent:  $('#indent'),
+    input: $('#in'),
+    out: $('#out'),
+    tree: $('#tree'),
+    label: $('#out-label'),
+    indent: $('#indent'),
     indentF: $('#indent-field'),
-    sort:    $('#sort'),
-    size:    $('#in-size'),
-    wrap:    $('#wrap-toggle')
+    sort: $('#sort'),
+    size: $('#in-size'),
+    wrap: $('#wrap-toggle')
   };
 
   var store = ui.store('json');
   var status = ui.status($('#status'));
   var mode = store.get('mode', 'format');
-  var lastText = '';   /* what copy and download hand over */
+  var lastText = ''; /* what copy and download hand over */
 
   var lines = { in: ui.gutter(els.input), out: ui.gutter(els.out) };
 
-  var SAMPLE = JSON.stringify({
-    id: 'a3f1',
-    service: 'tools.marpheus.dev',
-    offline: true,
-    tools: ['json', 'regex', 'base64', 'jwt', 'diff'],
-    limits: { maxUploadBytes: 0, telemetry: null },
-    updated: '2026-07-25T09:12:00Z'
-  }, null, 2);
+  var SAMPLE = JSON.stringify(
+    {
+      id: 'a3f1',
+      service: 'tools.marpheus.dev',
+      offline: true,
+      tools: ['json', 'regex', 'base64', 'jwt', 'diff'],
+      limits: { maxUploadBytes: 0, telemetry: null },
+      updated: '2026-07-25T09:12:00Z'
+    },
+    null,
+    2
+  );
 
   /* ── mode switching ──────────────────────────────────────────── */
 
@@ -66,9 +71,9 @@
   /* the output numbers only line up while the output is unwrapped text, and
      numbering the placeholder of an empty pane is just noise */
   function syncOutGutter() {
-    lines.out.show(mode !== 'tree' &&
-                   !els.out.classList.contains('wrap-on') &&
-                   els.out.textContent !== '');
+    lines.out.show(
+      mode !== 'tree' && !els.out.classList.contains('wrap-on') && els.out.textContent !== ''
+    );
   }
 
   function setOut(text) {
@@ -196,7 +201,11 @@
       throw e;
     }
     function ws() {
-      while (i < src.length && (src[i] === ' ' || src[i] === '\t' || src[i] === '\n' || src[i] === '\r')) i++;
+      while (
+        i < src.length &&
+        (src[i] === ' ' || src[i] === '\t' || src[i] === '\n' || src[i] === '\r')
+      )
+        i++;
     }
     function here() {
       if (i >= src.length) return 'end of input';
@@ -213,9 +222,18 @@
       if (c === '[') return array(depth);
       if (c === '"') return string();
       if (c === '-' || (c >= '0' && c <= '9')) return number();
-      if (src.startsWith('true', i))  { i += 4; return; }
-      if (src.startsWith('false', i)) { i += 5; return; }
-      if (src.startsWith('null', i))  { i += 4; return; }
+      if (src.startsWith('true', i)) {
+        i += 4;
+        return;
+      }
+      if (src.startsWith('false', i)) {
+        i += 5;
+        return;
+      }
+      if (src.startsWith('null', i)) {
+        i += 4;
+        return;
+      }
       /* the three mistakes people actually make, named for what they are */
       if (c === "'") err('single quotes are not valid json — use double quotes');
       if (/[A-Za-z_$]/.test(c)) {
@@ -226,9 +244,12 @@
     }
 
     function object(depth) {
-      i++;  /* { */
+      i++; /* { */
       ws();
-      if (src[i] === '}') { i++; return; }
+      if (src[i] === '}') {
+        i++;
+        return;
+      }
       for (;;) {
         ws();
         if (i >= src.length) err('unexpected end of input — the object is never closed');
@@ -240,24 +261,39 @@
         i++;
         value(depth + 1);
         ws();
-        if (src[i] === ',') { i++; continue; }
-        if (src[i] === '}') { i++; return; }
+        if (src[i] === ',') {
+          i++;
+          continue;
+        }
+        if (src[i] === '}') {
+          i++;
+          return;
+        }
         if (i >= src.length) err('unexpected end of input — the object is never closed');
         err('expected "," or "}", found ' + here());
       }
     }
 
     function array(depth) {
-      i++;  /* [ */
+      i++; /* [ */
       ws();
-      if (src[i] === ']') { i++; return; }
+      if (src[i] === ']') {
+        i++;
+        return;
+      }
       for (;;) {
         ws();
         if (src[i] === ']') err('trailing comma before ' + here());
         value(depth + 1);
         ws();
-        if (src[i] === ',') { i++; continue; }
-        if (src[i] === ']') { i++; return; }
+        if (src[i] === ',') {
+          i++;
+          continue;
+        }
+        if (src[i] === ']') {
+          i++;
+          return;
+        }
         if (i >= src.length) err('unexpected end of input — the array is never closed');
         err('expected "," or "]", found ' + here());
       }
@@ -265,17 +301,23 @@
 
     function string() {
       var open = i;
-      i++;  /* " */
+      i++; /* " */
       for (;;) {
         if (i >= src.length) err('unterminated string', open);
         var c = src[i];
-        if (c === '"') { i++; return; }
+        if (c === '"') {
+          i++;
+          return;
+        }
         if (c === '\n') err('unterminated string — a line break needs to be written as \\n', i);
         if (c === '\\') {
           i++;
           var e = src[i];
           if (e === undefined) err('unterminated string', open);
-          if ('"\\/bfnrt'.indexOf(e) !== -1) { i++; continue; }
+          if ('"\\/bfnrt'.indexOf(e) !== -1) {
+            i++;
+            continue;
+          }
           if (e === 'u') {
             if (!/^[0-9a-fA-F]{4}/.test(src.slice(i + 1, i + 5))) {
               err('\\u needs four hex digits', i - 1);
@@ -316,10 +358,12 @@
   function sortKeys(v) {
     if (Array.isArray(v)) return v.map(sortKeys);
     if (v && typeof v === 'object') {
-      return Object.keys(v).sort().reduce(function (acc, k) {
-        acc[k] = sortKeys(v[k]);
-        return acc;
-      }, {});
+      return Object.keys(v)
+        .sort()
+        .reduce(function (acc, k) {
+          acc[k] = sortKeys(v[k]);
+          return acc;
+        }, {});
     }
     return v;
   }
@@ -327,11 +371,13 @@
   /* node and depth counts, without recursing so deep that we blow the stack
      on a pathological document */
   function describe(root) {
-    var nodes = 0, depth = 0;
+    var nodes = 0,
+      depth = 0;
     var stack = [[root, 1]];
     while (stack.length) {
       var frame = stack.pop();
-      var v = frame[0], d = frame[1];
+      var v = frame[0],
+        d = frame[1];
       nodes++;
       if (d > depth) depth = d;
       if (Array.isArray(v)) {
@@ -393,12 +439,18 @@
       if (filled) return;
       filled = true;
       if (isArr) {
-        value.forEach(function (v, i) { kids.appendChild(node(String(i), v, false)); });
+        value.forEach(function (v, i) {
+          kids.appendChild(node(String(i), v, false));
+        });
       } else {
-        Object.keys(value).forEach(function (k) { kids.appendChild(node(k, value[k], false)); });
+        Object.keys(value).forEach(function (k) {
+          kids.appendChild(node(k, value[k], false));
+        });
       }
     };
-    details.addEventListener('toggle', function () { if (details.open) fill(); });
+    details.addEventListener('toggle', function () {
+      if (details.open) fill();
+    });
     if (open) fill();
 
     li.appendChild(details);
@@ -414,8 +466,14 @@
 
   function leaf(v) {
     var s = document.createElement('span');
-    s.className = v === null ? 'jnull' : typeof v === 'string' ? 'jstr'
-      : typeof v === 'number' ? 'jnum' : 'jbool';
+    s.className =
+      v === null
+        ? 'jnull'
+        : typeof v === 'string'
+          ? 'jstr'
+          : typeof v === 'number'
+            ? 'jnum'
+            : 'jbool';
     s.textContent = JSON.stringify(v);
     return s;
   }
@@ -427,7 +485,9 @@
     return s;
   }
 
-  function text(t) { return document.createTextNode(t); }
+  function text(t) {
+    return document.createTextNode(t);
+  }
 
   /* ── wiring ──────────────────────────────────────────────────── */
 
@@ -449,7 +509,9 @@
     syncOutGutter();
   });
 
-  $('#copy').addEventListener('click', function () { ui.copy(lastText); });
+  $('#copy').addEventListener('click', function () {
+    ui.copy(lastText);
+  });
   $('#save').addEventListener('click', function () {
     if (!lastText) return ui.toast('nothing to download');
     ui.download(lastText, 'data.json', 'application/json;charset=utf-8');
@@ -474,7 +536,9 @@
 
   ui.keys({
     'mod+enter': run,
-    'mod+shift+c': function () { ui.copy(lastText); }
+    'mod+shift+c': function () {
+      ui.copy(lastText);
+    }
   });
 
   /* ── restore ─────────────────────────────────────────────────── */

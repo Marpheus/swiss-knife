@@ -10,12 +10,18 @@ SK.bytes = (function () {
   var dec = new TextDecoder('utf-8', { fatal: false });
   var strictDec = new TextDecoder('utf-8', { fatal: true });
 
-  function fromText(str) { return enc.encode(str); }
-  function toText(bytes) { return dec.decode(bytes); }
+  function fromText(str) {
+    return enc.encode(str);
+  }
+  function toText(bytes) {
+    return dec.decode(bytes);
+  }
 
   /* Throws if the bytes are not valid UTF-8 — used to decide whether a
      decoded blob can be shown as text or has to stay a download. */
-  function toTextStrict(bytes) { return strictDec.decode(bytes); }
+  function toTextStrict(bytes) {
+    return strictDec.decode(bytes);
+  }
 
   /* Chunked so a multi-megabyte file doesn't blow the argument limit of
      String.fromCharCode.apply. */
@@ -73,22 +79,34 @@ SK.bytes = (function () {
   }
 
   /* base64url of a UTF-8 string and back — the JWT encoding */
-  function b64urlEncode(str) { return toBase64(fromText(str), { url: true }); }
-  function b64urlDecode(str) { return toText(fromBase64(str)); }
+  function b64urlEncode(str) {
+    return toBase64(fromText(str), { url: true });
+  }
+  function b64urlDecode(str) {
+    return toText(fromBase64(str));
+  }
 
   function human(n) {
     if (n < 1024) return n + ' B';
     var units = ['kB', 'MB', 'GB', 'TB'];
     var i = -1;
-    do { n /= 1024; i++; } while (n >= 1024 && i < units.length - 1);
+    do {
+      n /= 1024;
+      i++;
+    } while (n >= 1024 && i < units.length - 1);
     return (n < 10 ? n.toFixed(1) : Math.round(n)) + ' ' + units[i];
   }
 
   return {
-    fromText: fromText, toText: toText, toTextStrict: toTextStrict,
-    toBase64: toBase64, fromBase64: fromBase64,
-    toHex: toHex, fromHex: fromHex,
-    b64urlEncode: b64urlEncode, b64urlDecode: b64urlDecode,
+    fromText: fromText,
+    toText: toText,
+    toTextStrict: toTextStrict,
+    toBase64: toBase64,
+    fromBase64: fromBase64,
+    toHex: toHex,
+    fromHex: fromHex,
+    b64urlEncode: b64urlEncode,
+    b64urlDecode: b64urlDecode,
     human: human
   };
 })();

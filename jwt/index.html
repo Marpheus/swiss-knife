@@ -1,77 +1,100 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>jwt — tools</title>
-<meta name="description" content="Decode a JWT and verify its signature in your browser. The token is never sent anywhere.">
-<meta name="theme-color" content="#0a0a0a">
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/base.css">
-<link rel="stylesheet" href="/assets/tool.css">
-<script src="/assets/theme-init.js"></script>
-</head>
-<body data-tool="jwt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>jwt — tools</title>
+    <meta
+      name="description"
+      content="Decode a JWT and verify its signature in your browser. The token is never sent anywhere."
+    />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'"
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/base.css" />
+    <link rel="stylesheet" href="/assets/tool.css" />
+    <script src="/assets/theme-init.js"></script>
+  </head>
+  <body data-tool="jwt">
+    <a class="skip" href="#in">skip to the token</a>
 
-<a class="skip" href="#in">skip to the token</a>
+    <main class="wrap tool">
+      <header id="bar"></header>
+      <div id="tool-head"></div>
 
-<main class="wrap tool">
+      <p class="no-js-note">
+        This tool is JavaScript — that is why it can run without a server. Enable it to continue.
+      </p>
 
-  <header id="bar"></header>
-  <div id="tool-head"></div>
+      <div class="toolbar needs-js">
+        <label class="opt"><input type="checkbox" id="verify" /> verify the signature</label>
+        <label class="opt" id="b64secret-opt" hidden
+          ><input type="checkbox" id="b64secret" /> secret is base64</label
+        >
 
-  <p class="no-js-note">This tool is JavaScript — that is why it can run without a server. Enable it to continue.</p>
+        <span class="spacer"></span>
 
-  <div class="toolbar needs-js">
-    <label class="opt"><input type="checkbox" id="verify"> verify the signature</label>
-    <label class="opt" id="b64secret-opt" hidden><input type="checkbox" id="b64secret"> secret is base64</label>
-
-    <span class="spacer"></span>
-
-    <div class="actions">
-      <button class="btn" type="button" id="sample">sample</button>
-      <button class="btn" type="button" id="copy">copy payload</button>
-      <button class="btn" type="button" id="clear">clear</button>
-    </div>
-  </div>
-
-  <div class="key-row needs-js" id="key-row" hidden>
-    <label class="key-label" for="key">key</label>
-    <textarea id="key" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
-              placeholder="hs* — the shared secret · rs*/ps*/es* — a public key as PEM (BEGIN PUBLIC KEY) or JWK"></textarea>
-  </div>
-
-  <div class="panes needs-js">
-    <section class="pane" id="in-pane" aria-label="Token">
-      <div class="pane-head"><span>token</span><span class="spacer"></span><span id="in-size"></span></div>
-      <div class="pane-body">
-        <textarea id="in" spellcheck="false" autocomplete="off" autocapitalize="off"
-                  class="wrap-on" placeholder="paste a jwt — header.payload.signature"></textarea>
-      </div>
-    </section>
-
-    <section class="pane" aria-label="Decoded">
-      <div class="pane-head"><span>decoded</span><span class="spacer"></span><span id="alg-tag"></span></div>
-      <div class="pane-body">
-        <div class="scroller">
-          <div class="stack" id="decoded"></div>
+        <div class="actions">
+          <button class="btn" type="button" id="sample">sample</button>
+          <button class="btn" type="button" id="copy">copy payload</button>
+          <button class="btn" type="button" id="clear">clear</button>
         </div>
       </div>
-    </section>
-  </div>
 
-  <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+      <div class="key-row needs-js" id="key-row" hidden>
+        <label class="key-label" for="key">key</label>
+        <textarea
+          id="key"
+          rows="2"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off"
+          placeholder="hs* — the shared secret · rs*/ps*/es* — a public key as PEM (BEGIN PUBLIC KEY) or JWK"
+        ></textarea>
+      </div>
 
-  <footer id="foot"></footer>
-</main>
+      <div class="panes needs-js">
+        <section class="pane" id="in-pane" aria-label="Token">
+          <div class="pane-head">
+            <span>token</span><span class="spacer"></span><span id="in-size"></span>
+          </div>
+          <div class="pane-body">
+            <textarea
+              id="in"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              class="wrap-on"
+              placeholder="paste a jwt — header.payload.signature"
+            ></textarea>
+          </div>
+        </section>
 
-<script src="/assets/registry.js"></script>
-<script src="/assets/chrome.js"></script>
-<script src="/assets/bytes.js" defer></script>
-<script src="/assets/ui.js" defer></script>
-<script src="/jwt/jwt.js" defer></script>
-<script src="/assets/theme.js" defer></script>
-</body>
+        <section class="pane" aria-label="Decoded">
+          <div class="pane-head">
+            <span>decoded</span><span class="spacer"></span><span id="alg-tag"></span>
+          </div>
+          <div class="pane-body">
+            <div class="scroller">
+              <div class="stack" id="decoded"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+
+      <footer id="foot"></footer>
+    </main>
+
+    <script src="/assets/registry.js"></script>
+    <script src="/assets/chrome.js"></script>
+    <script src="/assets/bytes.js" defer></script>
+    <script src="/assets/ui.js" defer></script>
+    <script src="/jwt/jwt.js" defer></script>
+    <script src="/assets/theme.js" defer></script>
+  </body>
 </html>

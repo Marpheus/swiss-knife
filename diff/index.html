@@ -1,92 +1,113 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>diff — tools</title>
-<meta name="description" content="Compare two texts in your browser, line or word level, unified or side by side. Nothing is uploaded.">
-<meta name="theme-color" content="#0a0a0a">
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/base.css">
-<link rel="stylesheet" href="/assets/tool.css">
-<script src="/assets/theme-init.js"></script>
-</head>
-<body data-tool="diff">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>diff — tools</title>
+    <meta
+      name="description"
+      content="Compare two texts in your browser, line or word level, unified or side by side. Nothing is uploaded."
+    />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'"
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/base.css" />
+    <link rel="stylesheet" href="/assets/tool.css" />
+    <script src="/assets/theme-init.js"></script>
+  </head>
+  <body data-tool="diff">
+    <a class="skip" href="#a">skip to the first text</a>
 
-<a class="skip" href="#a">skip to the first text</a>
+    <main class="wrap tool">
+      <header id="bar"></header>
+      <div id="tool-head"></div>
 
-<main class="wrap tool">
+      <p class="no-js-note">
+        This tool is JavaScript — that is why it can run without a server. Enable it to continue.
+      </p>
 
-  <header id="bar"></header>
-  <div id="tool-head"></div>
+      <div class="toolbar needs-js">
+        <div class="seg" role="group" aria-label="Layout">
+          <button type="button" data-layout="unified" aria-pressed="true">unified</button>
+          <button type="button" data-layout="split" aria-pressed="false">side by side</button>
+        </div>
 
-  <p class="no-js-note">This tool is JavaScript — that is why it can run without a server. Enable it to continue.</p>
+        <div class="seg" role="group" aria-label="Granularity">
+          <button type="button" data-grain="line" aria-pressed="true">by line</button>
+          <button type="button" data-grain="word" aria-pressed="false">by word</button>
+        </div>
 
-  <div class="toolbar needs-js">
-    <div class="seg" role="group" aria-label="Layout">
-      <button type="button" data-layout="unified" aria-pressed="true">unified</button>
-      <button type="button" data-layout="split" aria-pressed="false">side by side</button>
-    </div>
+        <label class="opt"><input type="checkbox" id="ws" /> ignore whitespace</label>
+        <label class="opt"><input type="checkbox" id="case" /> ignore case</label>
+        <label class="opt"><input type="checkbox" id="all" /> show everything</label>
 
-    <div class="seg" role="group" aria-label="Granularity">
-      <button type="button" data-grain="line" aria-pressed="true">by line</button>
-      <button type="button" data-grain="word" aria-pressed="false">by word</button>
-    </div>
+        <span class="spacer"></span>
 
-    <label class="opt"><input type="checkbox" id="ws"> ignore whitespace</label>
-    <label class="opt"><input type="checkbox" id="case"> ignore case</label>
-    <label class="opt"><input type="checkbox" id="all"> show everything</label>
-
-    <span class="spacer"></span>
-
-    <div class="actions">
-      <button class="btn" type="button" id="sample">sample</button>
-      <button class="btn" type="button" id="swap">swap</button>
-      <button class="btn" type="button" id="copy">copy patch</button>
-      <button class="btn" type="button" id="clear">clear</button>
-    </div>
-  </div>
-
-  <div class="panes short needs-js">
-    <section class="pane" id="a-pane" aria-label="First text">
-      <div class="pane-head"><span>before</span><span class="spacer"></span><span id="a-size"></span></div>
-      <div class="pane-body">
-        <textarea id="a" spellcheck="false" autocomplete="off" autocapitalize="off"
-                  placeholder="the original — paste or drop a file"></textarea>
+        <div class="actions">
+          <button class="btn" type="button" id="sample">sample</button>
+          <button class="btn" type="button" id="swap">swap</button>
+          <button class="btn" type="button" id="copy">copy patch</button>
+          <button class="btn" type="button" id="clear">clear</button>
+        </div>
       </div>
-    </section>
 
-    <section class="pane" id="b-pane" aria-label="Second text">
-      <div class="pane-head"><span>after</span><span class="spacer"></span><span id="b-size"></span></div>
-      <div class="pane-body">
-        <textarea id="b" spellcheck="false" autocomplete="off" autocapitalize="off"
-                  placeholder="the changed version"></textarea>
+      <div class="panes short needs-js">
+        <section class="pane" id="a-pane" aria-label="First text">
+          <div class="pane-head">
+            <span>before</span><span class="spacer"></span><span id="a-size"></span>
+          </div>
+          <div class="pane-body">
+            <textarea
+              id="a"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              placeholder="the original — paste or drop a file"
+            ></textarea>
+          </div>
+        </section>
+
+        <section class="pane" id="b-pane" aria-label="Second text">
+          <div class="pane-head">
+            <span>after</span><span class="spacer"></span><span id="b-size"></span>
+          </div>
+          <div class="pane-body">
+            <textarea
+              id="b"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              placeholder="the changed version"
+            ></textarea>
+          </div>
+        </section>
       </div>
-    </section>
-  </div>
 
-  <div class="panes single needs-js">
-    <section class="pane" aria-label="Differences">
-      <div class="pane-head"><span>changes</span><span class="spacer"></span><span id="tally"></span></div>
-      <div class="pane-body">
-        <div class="diff" id="diff" tabindex="0"></div>
+      <div class="panes single needs-js">
+        <section class="pane" aria-label="Differences">
+          <div class="pane-head">
+            <span>changes</span><span class="spacer"></span><span id="tally"></span>
+          </div>
+          <div class="pane-body">
+            <div class="diff" id="diff" tabindex="0"></div>
+          </div>
+        </section>
       </div>
-    </section>
-  </div>
 
-  <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+      <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
 
-  <footer id="foot"></footer>
-</main>
+      <footer id="foot"></footer>
+    </main>
 
-<script src="/assets/registry.js"></script>
-<script src="/assets/chrome.js"></script>
-<script src="/assets/bytes.js" defer></script>
-<script src="/assets/ui.js" defer></script>
-<script src="/assets/myers.js" defer></script>
-<script src="/diff/diff.js" defer></script>
-<script src="/assets/theme.js" defer></script>
-</body>
+    <script src="/assets/registry.js"></script>
+    <script src="/assets/chrome.js"></script>
+    <script src="/assets/bytes.js" defer></script>
+    <script src="/assets/ui.js" defer></script>
+    <script src="/assets/myers.js" defer></script>
+    <script src="/diff/diff.js" defer></script>
+    <script src="/assets/theme.js" defer></script>
+  </body>
 </html>

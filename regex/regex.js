@@ -4,44 +4,46 @@
    (see regex-worker.js); the main thread only compiles the pattern, which is
    cheap and gives a good syntax error for free. */
 (function () {
-  var ui = SK.ui, B = SK.bytes;
+  var ui = SK.ui,
+    B = SK.bytes;
   var $ = ui.$;
 
   var els = {
-    pattern:  $('#pattern'),
-    flags:    $('#flags'),
-    input:    $('#in'),
-    hl:       $('#hl'),
-    groups:   $('#groups-view'),
+    pattern: $('#pattern'),
+    flags: $('#flags'),
+    input: $('#in'),
+    hl: $('#hl'),
+    groups: $('#groups-view'),
     replaced: $('#replaced'),
     replacement: $('#replacement'),
     replaceField: $('#replace-field'),
-    label:    $('#out-label'),
-    count:    $('#hit-count'),
-    size:     $('#in-size')
+    label: $('#out-label'),
+    count: $('#hit-count'),
+    size: $('#in-size')
   };
 
   var store = ui.store('regex');
   var status = ui.status($('#status'));
   var view = store.get('view', 'matches');
-  var last = null;      /* the most recent result, for copy */
+  var last = null; /* the most recent result, for copy */
   var gutter = ui.gutter(els.input);
 
-  var DEADLINE = 1500;  /* ms before we assume the pattern has run away */
-  var RENDER_CAP = 120000;  /* characters of highlighted text we will build */
+  var DEADLINE = 1500; /* ms before we assume the pattern has run away */
+  var RENDER_CAP = 120000; /* characters of highlighted text we will build */
 
   var SAMPLE = {
     pattern: '(?<user>[\\w.+-]+)@(?<host>[\\w-]+\\.[\\w.]+)',
     flags: 'gi',
-    text: 'Ping ada@example.com or Grace.Hopper+navy@navy.mil.\n' +
-          'Not an address: @nope, mail@, a b@c.\n' +
-          '\\w is ascii only, so this one is skipped: jánoš@čsfd.cz'
+    text:
+      'Ping ada@example.com or Grace.Hopper+navy@navy.mil.\n' +
+      'Not an address: @nope, mail@, a b@c.\n' +
+      '\\w is ascii only, so this one is skipped: jánoš@čsfd.cz'
   };
 
   /* ── the worker, and the fallback when there cannot be one ───── */
 
   var worker = null;
-  var workerBroken = false;   /* file:// origins cannot spawn one */
+  var workerBroken = false; /* file:// origins cannot spawn one */
   var seq = 0;
   var pending = 0;
   var timer = null;
@@ -71,7 +73,11 @@
   function dispatch(job) {
     if (workerBroken || !spawn()) {
       /* no safety net available: run inline and accept the risk */
-      try { show(inline(job)); } catch (e) { status.err(e.message); }
+      try {
+        show(inline(job));
+      } catch (e) {
+        status.err(e.message);
+      }
       return;
     }
     clearTimeout(timer);
@@ -92,10 +98,14 @@
   /* same logic as the worker, used only when a worker is impossible */
   function inline(job) {
     var flags = job.flags.indexOf('g') === -1 ? job.flags + 'g' : job.flags;
-    var re = new RegExp(job.pattern, flags), m, out = [];
+    var re = new RegExp(job.pattern, flags),
+      m,
+      out = [];
     while ((m = re.exec(job.text)) !== null) {
       out.push({
-        index: m.index, end: m.index + m[0].length, text: m[0],
+        index: m.index,
+        end: m.index + m[0].length,
+        text: m[0],
         groups: Array.prototype.slice.call(m, 1),
         named: m.groups ? Object.assign({}, m.groups) : null
       });
@@ -106,8 +116,10 @@
     return {
       matches: out,
       truncated: out.length >= 5000,
-      replaced: job.replacement == null ? null
-        : job.text.replace(new RegExp(job.pattern, job.flags), job.replacement)
+      replaced:
+        job.replacement == null
+          ? null
+          : job.text.replace(new RegExp(job.pattern, job.flags), job.replacement)
     };
   }
 
@@ -170,7 +182,8 @@
   function show(res) {
     last = res;
     var n = res.matches.length;
-    els.count.textContent = n + (n === 1 ? ' match' : ' matches') + (res.truncated ? ' (capped)' : '');
+    els.count.textContent =
+      n + (n === 1 ? ' match' : ' matches') + (res.truncated ? ' (capped)' : '');
 
     if (view === 'matches') renderHighlight(res);
     else if (view === 'groups') renderGroups(res);
@@ -193,8 +206,10 @@
   }
 
   function pct(res) {
-    var chars = res.matches.reduce(function (a, m) { return a + m.text.length; }, 0);
-    return Math.round(chars / Math.max(els.input.value.length, 1) * 100);
+    var chars = res.matches.reduce(function (a, m) {
+      return a + m.text.length;
+    }, 0);
+    return Math.round((chars / Math.max(els.input.value.length, 1)) * 100);
   }
 
   /* ── views ───────────────────────────────────────────────────── */
@@ -211,12 +226,21 @@
       if (m.index >= limit) break;
       html += ui.esc(text.slice(at, m.index));
       /* alternate the style so two touching matches stay distinguishable */
-      html += '<mark class="' + (i % 2 ? 'alt' : '') + '" title="match ' + (i + 1) +
-              ' at ' + m.index + '">' + (m.text === '' ? '&#8203;' : ui.esc(m.text)) + '</mark>';
+      html +=
+        '<mark class="' +
+        (i % 2 ? 'alt' : '') +
+        '" title="match ' +
+        (i + 1) +
+        ' at ' +
+        m.index +
+        '">' +
+        (m.text === '' ? '&#8203;' : ui.esc(m.text)) +
+        '</mark>';
       at = Math.max(m.end, m.index);
     }
     html += ui.esc(text.slice(at, limit));
-    if (capped) html += '\n\n… the rest is not highlighted (text over ' + RENDER_CAP + ' characters)';
+    if (capped)
+      html += '\n\n… the rest is not highlighted (text over ' + RENDER_CAP + ' characters)';
     els.hl.innerHTML = html;
   }
 
@@ -235,14 +259,24 @@
     }
     head += '</tr>';
 
-    var rows = res.matches.map(function (m, i) {
-      var tds = '<td class="k">' + (i + 1) + '</td><td class="k">' + m.index + '</td>' +
-                '<td>' + cell(m.text) + '</td>';
-      for (var g = 0; g < arity; g++) tds += '<td>' + cell(m.groups[g]) + '</td>';
-      return '<tr>' + tds + '</tr>';
-    }).join('');
+    var rows = res.matches
+      .map(function (m, i) {
+        var tds =
+          '<td class="k">' +
+          (i + 1) +
+          '</td><td class="k">' +
+          m.index +
+          '</td>' +
+          '<td>' +
+          cell(m.text) +
+          '</td>';
+        for (var g = 0; g < arity; g++) tds += '<td>' + cell(m.groups[g]) + '</td>';
+        return '<tr>' + tds + '</tr>';
+      })
+      .join('');
 
-    els.groups.innerHTML = '<table class="kv"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table>';
+    els.groups.innerHTML =
+      '<table class="kv"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table>';
   }
 
   function cell(v) {
@@ -297,15 +331,35 @@
   $('#copy').addEventListener('click', function () {
     if (!last) return ui.toast('nothing to copy');
     if (view === 'replace') return ui.copy(last.replaced || '');
-    if (view === 'matches') return ui.copy(last.matches.map(function (m) { return m.text; }).join('\n'));
+    if (view === 'matches')
+      return ui.copy(
+        last.matches
+          .map(function (m) {
+            return m.text;
+          })
+          .join('\n')
+      );
     /* groups copy as tab-separated rows, ready to paste into a sheet */
-    ui.copy(last.matches.map(function (m) {
-      return [m.index, m.text].concat(m.groups.map(function (g) { return g === undefined ? '' : g; })).join('\t');
-    }).join('\n'));
+    ui.copy(
+      last.matches
+        .map(function (m) {
+          return [m.index, m.text]
+            .concat(
+              m.groups.map(function (g) {
+                return g === undefined ? '' : g;
+              })
+            )
+            .join('\t');
+        })
+        .join('\n')
+    );
   });
 
   ui.acceptDrop($('#in-pane'), function (file) {
-    ui.readText(file).then(function (t) { els.input.value = t; run(); });
+    ui.readText(file).then(function (t) {
+      els.input.value = t;
+      run();
+    });
   });
 
   ui.keys({ 'mod+enter': run });

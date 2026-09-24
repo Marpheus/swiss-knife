@@ -10,16 +10,25 @@
   var host = document.getElementById('tools');
   if (!host || !window.SK) return;
 
-  host.innerHTML = '<ul class="cards" data-reveal>' +
-    SK.tools.map(card).join('') + '</ul>';
+  host.innerHTML = '<ul class="cards" data-reveal>' + SK.tools.map(card).join('') + '</ul>';
 
   function card(t) {
-    return '<li class="card"' +
-      ' data-hay="' + esc((t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || '')).toLowerCase()) + '">' +
-      '<a href="/' + esc(t.slug) + '/">' +
-        '<span class="card-title">' + esc(t.name) + '</span>' +
-        '<span class="card-note">' + esc(t.note) + '</span>' +
-      '</a></li>';
+    return (
+      '<li class="card"' +
+      ' data-hay="' +
+      esc((t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || '')).toLowerCase()) +
+      '">' +
+      '<a href="/' +
+      esc(t.slug) +
+      '/">' +
+      '<span class="card-title">' +
+      esc(t.name) +
+      '</span>' +
+      '<span class="card-note">' +
+      esc(t.note) +
+      '</span>' +
+      '</a></li>'
+    );
   }
 
   /* ── filter ──────────────────────────────────────────────────── */

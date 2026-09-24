@@ -10,7 +10,9 @@
 
   function apply(theme) {
     root.dataset.theme = theme;
-    try { localStorage.setItem('theme', theme); } catch (e) {}
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {}
     document.querySelectorAll('.theme').forEach(function (b) {
       b.setAttribute('aria-pressed', String(theme === 'light'));
     });
@@ -27,7 +29,11 @@
      property because a CSP without 'unsafe-inline' rules out style attributes,
      and setting it through CSSOM is not subject to that restriction. */
   var revealed = document.querySelectorAll('[data-reveal]');
-  revealed.forEach(function (el, i) { el.style.setProperty('--i', i); });
+  revealed.forEach(function (el, i) {
+    el.style.setProperty('--i', i);
+  });
 
-  requestAnimationFrame(function () { root.classList.add('ready'); });
+  requestAnimationFrame(function () {
+    root.classList.add('ready');
+  });
 })();

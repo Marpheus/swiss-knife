@@ -14,7 +14,8 @@ function lcsLen(a, b) {
   const dp = Array.from({ length: a.length + 1 }, () => new Int32Array(b.length + 1));
   for (let i = 1; i <= a.length; i++)
     for (let j = 1; j <= b.length; j++)
-      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+      dp[i][j] =
+        a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
   return dp[a.length][b.length];
 }
 
@@ -29,12 +30,14 @@ function apply(script, a, b) {
 
 function checkIndices(script, a, b) {
   // ai must walk a in order and cover every removal/keep exactly once
-  let ai = 0, bi = 0;
+  let ai = 0,
+    bi = 0;
   for (const e of script) {
     if (e.op === 0) {
       if (e.ai !== ai || e.bi !== bi) return `index drift at keep: ${e.ai}/${ai} ${e.bi}/${bi}`;
       if (a[e.ai] !== b[e.bi]) return `keep of unequal items: ${a[e.ai]} vs ${b[e.bi]}`;
-      ai++; bi++;
+      ai++;
+      bi++;
     } else if (e.op === -1) {
       if (e.ai !== ai || e.bi !== null) return `bad remove entry at ${ai}`;
       ai++;
@@ -43,11 +46,13 @@ function checkIndices(script, a, b) {
       bi++;
     }
   }
-  if (ai !== a.length || bi !== b.length) return `did not consume both: ${ai}/${a.length} ${bi}/${b.length}`;
+  if (ai !== a.length || bi !== b.length)
+    return `did not consume both: ${ai}/${a.length} ${bi}/${b.length}`;
   return null;
 }
 
-let fails = 0, cases = 0;
+let fails = 0,
+  cases = 0;
 const alphabets = ['ab', 'abc', 'abcdefgh'];
 
 for (let round = 0; round < 4000; round++) {
@@ -59,10 +64,14 @@ for (let round = 0; round < 4000; round++) {
 
   const script = myers(a, b);
   cases++;
-  if (script === null) { console.log('NULL for', a.join(''), b.join('')); fails++; continue; }
+  if (script === null) {
+    console.log('NULL for', a.join(''), b.join(''));
+    fails++;
+    continue;
+  }
 
   const rebuilt = apply(script, a, b).join('');
-  const kept = script.filter(e => e.op === 0).length;
+  const kept = script.filter((e) => e.op === 0).length;
   const want = lcsLen(a, b);
   const idx = checkIndices(script, a, b);
 
@@ -79,16 +88,25 @@ for (let round = 0; round < 4000; round++) {
 
 // a few shapes worth pinning down explicitly
 const edge = [
-  [[], []], [[], ['a']], [['a'], []], [['a'], ['a']],
-  [['a', 'b', 'c'], ['a', 'b', 'c']],
-  [['a', 'b', 'c'], ['x', 'y', 'z']],
-  ['ABCABBA'.split(''), 'CBABAC'.split('')],   // the example from Myers' paper
+  [[], []],
+  [[], ['a']],
+  [['a'], []],
+  [['a'], ['a']],
+  [
+    ['a', 'b', 'c'],
+    ['a', 'b', 'c']
+  ],
+  [
+    ['a', 'b', 'c'],
+    ['x', 'y', 'z']
+  ],
+  ['ABCABBA'.split(''), 'CBABAC'.split('')] // the example from Myers' paper
 ];
 for (const [a, b] of edge) {
   cases++;
   const s = myers(a, b);
   const rebuilt = apply(s, a, b).join('');
-  const kept = s.filter(e => e.op === 0).length;
+  const kept = s.filter((e) => e.op === 0).length;
   const want = lcsLen(a, b);
   const idx = checkIndices(s, a, b);
   if (rebuilt !== b.join('') || kept !== want || idx) {
@@ -108,7 +126,7 @@ const edited = base.slice();
 for (let i = 0; i < 40; i++) edited[Math.floor(Math.random() * edited.length)] = 'changed ' + i;
 const t0 = Date.now();
 const bigScript = myers(base, edited);
-console.log('20k lines, 40 edits:', bigScript ? (Date.now() - t0) + 'ms' : 'gave up');
+console.log('20k lines, 40 edits:', bigScript ? Date.now() - t0 + 'ms' : 'gave up');
 
 console.log(`\n${cases - fails}/${cases} passed`);
 process.exit(fails ? 1 : 0);

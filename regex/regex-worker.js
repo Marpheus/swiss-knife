@@ -10,7 +10,7 @@ self.onmessage = function (e) {
   try {
     self.postMessage({ ok: true, result: work(job) });
   } catch (err) {
-    self.postMessage({ ok: false, error: String(err && err.message || err) });
+    self.postMessage({ ok: false, error: String((err && err.message) || err) });
   }
 };
 
@@ -36,7 +36,10 @@ function work(job) {
 
     /* a pattern that can match nothing would otherwise never advance */
     if (m[0] === '') re.lastIndex++;
-    if (matches.length >= MAX_MATCHES) { truncated = true; break; }
+    if (matches.length >= MAX_MATCHES) {
+      truncated = true;
+      break;
+    }
     /* without the g flag the caller only wanted the first hit */
     if (job.flags.indexOf('g') === -1) break;
   }

@@ -1,87 +1,104 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>base64 — tools</title>
-<meta name="description" content="Encode and decode base64 in your browser, text or files, UTF-8 safe. Nothing is uploaded.">
-<meta name="theme-color" content="#0a0a0a">
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/base.css">
-<link rel="stylesheet" href="/assets/tool.css">
-<script src="/assets/theme-init.js"></script>
-</head>
-<body data-tool="base64">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>base64 — tools</title>
+    <meta
+      name="description"
+      content="Encode and decode base64 in your browser, text or files, UTF-8 safe. Nothing is uploaded."
+    />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'"
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/base.css" />
+    <link rel="stylesheet" href="/assets/tool.css" />
+    <script src="/assets/theme-init.js"></script>
+  </head>
+  <body data-tool="base64">
+    <a class="skip" href="#in">skip to the input</a>
 
-<a class="skip" href="#in">skip to the input</a>
+    <main class="wrap tool">
+      <header id="bar"></header>
+      <div id="tool-head"></div>
 
-<main class="wrap tool">
+      <p class="no-js-note">
+        This tool is JavaScript — that is why it can run without a server. Enable it to continue.
+      </p>
 
-  <header id="bar"></header>
-  <div id="tool-head"></div>
+      <div class="toolbar needs-js">
+        <div class="seg" role="group" aria-label="Direction">
+          <button type="button" data-mode="auto" aria-pressed="true">auto</button>
+          <button type="button" data-mode="encode" aria-pressed="false">encode</button>
+          <button type="button" data-mode="decode" aria-pressed="false">decode</button>
+        </div>
 
-  <p class="no-js-note">This tool is JavaScript — that is why it can run without a server. Enable it to continue.</p>
+        <label class="opt"><input type="checkbox" id="urlsafe" /> url-safe</label>
+        <label class="opt"><input type="checkbox" id="wrap76" /> wrap at 76</label>
+        <label class="opt"><input type="checkbox" id="datauri" /> data uri</label>
 
-  <div class="toolbar needs-js">
-    <div class="seg" role="group" aria-label="Direction">
-      <button type="button" data-mode="auto" aria-pressed="true">auto</button>
-      <button type="button" data-mode="encode" aria-pressed="false">encode</button>
-      <button type="button" data-mode="decode" aria-pressed="false">decode</button>
-    </div>
-
-    <label class="opt"><input type="checkbox" id="urlsafe"> url-safe</label>
-    <label class="opt"><input type="checkbox" id="wrap76"> wrap at 76</label>
-    <label class="opt"><input type="checkbox" id="datauri"> data uri</label>
-
-    <span class="spacer"></span>
-
-    <div class="actions">
-      <button class="btn" type="button" id="pick">load file</button>
-      <input type="file" id="file" hidden>
-      <button class="btn" type="button" id="swap">swap</button>
-      <button class="btn" type="button" id="copy">copy</button>
-      <button class="btn" type="button" id="save">download</button>
-      <button class="btn" type="button" id="clear">clear</button>
-    </div>
-  </div>
-
-  <div class="panes needs-js">
-    <section class="pane" id="in-pane" aria-label="Input">
-      <div class="pane-head"><span id="in-label">input</span><span class="spacer"></span><span id="in-size"></span></div>
-      <div class="filebar" id="filebar" hidden>
-        <span class="fname" id="fname"></span>
         <span class="spacer"></span>
-        <button class="btn" type="button" id="unload">unload</button>
-      </div>
-      <div class="pane-body">
-        <textarea id="in" spellcheck="false" autocomplete="off" autocapitalize="off"
-                  placeholder="type or paste — or drop a file to encode it"></textarea>
-      </div>
-    </section>
 
-    <section class="pane" aria-label="Output">
-      <div class="pane-head">
-        <span id="out-label">output</span><span class="spacer"></span>
-        <button class="btn" type="button" id="wrap-toggle" aria-pressed="true">wrap</button>
+        <div class="actions">
+          <button class="btn" type="button" id="pick">load file</button>
+          <input type="file" id="file" hidden />
+          <button class="btn" type="button" id="swap">swap</button>
+          <button class="btn" type="button" id="copy">copy</button>
+          <button class="btn" type="button" id="save">download</button>
+          <button class="btn" type="button" id="clear">clear</button>
+        </div>
       </div>
-      <div class="pane-body">
-        <pre class="out wrap-on" id="out" data-empty="output appears as you type" tabindex="0"></pre>
+
+      <div class="panes needs-js">
+        <section class="pane" id="in-pane" aria-label="Input">
+          <div class="pane-head">
+            <span id="in-label">input</span><span class="spacer"></span><span id="in-size"></span>
+          </div>
+          <div class="filebar" id="filebar" hidden>
+            <span class="fname" id="fname"></span>
+            <span class="spacer"></span>
+            <button class="btn" type="button" id="unload">unload</button>
+          </div>
+          <div class="pane-body">
+            <textarea
+              id="in"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              placeholder="type or paste — or drop a file to encode it"
+            ></textarea>
+          </div>
+        </section>
+
+        <section class="pane" aria-label="Output">
+          <div class="pane-head">
+            <span id="out-label">output</span><span class="spacer"></span>
+            <button class="btn" type="button" id="wrap-toggle" aria-pressed="true">wrap</button>
+          </div>
+          <div class="pane-body">
+            <pre
+              class="out wrap-on"
+              id="out"
+              data-empty="output appears as you type"
+              tabindex="0"
+            ></pre>
+          </div>
+        </section>
       </div>
-    </section>
-  </div>
 
-  <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
+      <div class="status needs-js" id="status" role="status" aria-live="polite"></div>
 
-  <footer id="foot"></footer>
-</main>
+      <footer id="foot"></footer>
+    </main>
 
-<script src="/assets/registry.js"></script>
-<script src="/assets/chrome.js"></script>
-<script src="/assets/bytes.js" defer></script>
-<script src="/assets/ui.js" defer></script>
-<script src="/base64/base64.js" defer></script>
-<script src="/assets/theme.js" defer></script>
-</body>
+    <script src="/assets/registry.js"></script>
+    <script src="/assets/chrome.js"></script>
+    <script src="/assets/bytes.js" defer></script>
+    <script src="/assets/ui.js" defer></script>
+    <script src="/base64/base64.js" defer></script>
+    <script src="/assets/theme.js" defer></script>
+  </body>
 </html>

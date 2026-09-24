@@ -3,15 +3,25 @@
 window.SK = window.SK || {};
 
 SK.ui = (function () {
-  var $  = function (sel, root) { return (root || document).querySelector(sel); };
-  var $$ = function (sel, root) { return Array.from((root || document).querySelectorAll(sel)); };
+  var $ = function (sel, root) {
+    return (root || document).querySelector(sel);
+  };
+  var $$ = function (sel, root) {
+    return Array.from((root || document).querySelectorAll(sel));
+  };
 
   function debounce(fn, ms) {
     var t;
     return function () {
-      var args = arguments, self = this;
+      var args = arguments,
+        self = this;
       clearTimeout(t);
-      t = setTimeout(function () { fn.apply(self, args); }, ms == null ? 120 : ms);
+      t = setTimeout(
+        function () {
+          fn.apply(self, args);
+        },
+        ms == null ? 120 : ms
+      );
     };
   }
 
@@ -36,16 +46,25 @@ SK.ui = (function () {
     void toastEl.offsetWidth;
     toastEl.classList.add('on');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove('on'); }, 1400);
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove('on');
+    }, 1400);
   }
 
   /* ── copy & download ─────────────────────────────────────────── */
 
   function copy(text) {
-    if (!text) { toast('nothing to copy'); return; }
-    var done = function () { toast('copied'); };
+    if (!text) {
+      toast('nothing to copy');
+      return;
+    }
+    var done = function () {
+      toast('copied');
+    };
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+      navigator.clipboard.writeText(text).then(done, function () {
+        fallbackCopy(text, done);
+      });
     } else {
       fallbackCopy(text, done);
     }
@@ -62,14 +81,16 @@ SK.ui = (function () {
     document.body.appendChild(ta);
     ta.select();
     var ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) {}
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {}
     document.body.removeChild(ta);
     ok ? done() : toast('copy blocked by the browser');
   }
 
   function download(data, filename, type) {
-    var blob = data instanceof Blob ? data
-      : new Blob([data], { type: type || 'text/plain;charset=utf-8' });
+    var blob =
+      data instanceof Blob ? data : new Blob([data], { type: type || 'text/plain;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
@@ -78,7 +99,9 @@ SK.ui = (function () {
     a.click();
     a.remove();
     /* revoke on the next tick — Safari needs the URL alive during the click */
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 1000);
   }
 
   /* ── file drop ───────────────────────────────────────────────── */
@@ -98,7 +121,10 @@ SK.ui = (function () {
       e.dataTransfer.dropEffect = 'copy';
     });
     pane.addEventListener('dragleave', function () {
-      if (--depth <= 0) { depth = 0; pane.classList.remove('dropping'); }
+      if (--depth <= 0) {
+        depth = 0;
+        pane.classList.remove('dropping');
+      }
     });
     pane.addEventListener('drop', function (e) {
       if (!hasFiles(e)) return;
@@ -116,21 +142,37 @@ SK.ui = (function () {
   }
 
   function readText(file) {
-    return file.text ? file.text() : new Promise(function (res, rej) {
-      var r = new FileReader();
-      r.onload = function () { res(r.result); };
-      r.onerror = function () { rej(r.error); };
-      r.readAsText(file);
-    });
+    return file.text
+      ? file.text()
+      : new Promise(function (res, rej) {
+          var r = new FileReader();
+          r.onload = function () {
+            res(r.result);
+          };
+          r.onerror = function () {
+            rej(r.error);
+          };
+          r.readAsText(file);
+        });
   }
 
   function readBytes(file) {
-    return (file.arrayBuffer ? file.arrayBuffer() : new Promise(function (res, rej) {
-      var r = new FileReader();
-      r.onload = function () { res(r.result); };
-      r.onerror = function () { rej(r.error); };
-      r.readAsArrayBuffer(file);
-    })).then(function (buf) { return new Uint8Array(buf); });
+    return (
+      file.arrayBuffer
+        ? file.arrayBuffer()
+        : new Promise(function (res, rej) {
+            var r = new FileReader();
+            r.onload = function () {
+              res(r.result);
+            };
+            r.onerror = function () {
+              rej(r.error);
+            };
+            r.readAsArrayBuffer(file);
+          })
+    ).then(function (buf) {
+      return new Uint8Array(buf);
+    });
   }
 
   /* ── remembering what you typed ──────────────────────────────── */
@@ -146,20 +188,28 @@ SK.ui = (function () {
         try {
           var v = localStorage.getItem(prefix + key);
           return v === null ? fallback : v;
-        } catch (e) { return fallback; }
+        } catch (e) {
+          return fallback;
+        }
       },
       set: function (key, value) {
         try {
           if (value == null || value === '') localStorage.removeItem(prefix + key);
           else if (String(value).length <= SAVE_CAP) localStorage.setItem(prefix + key, value);
           else localStorage.removeItem(prefix + key);
-        } catch (e) { /* private mode, or full — not worth reporting */ }
+        } catch (e) {
+          /* private mode, or full — not worth reporting */
+        }
       },
       clear: function () {
         try {
           Object.keys(localStorage)
-            .filter(function (k) { return k.indexOf(prefix) === 0; })
-            .forEach(function (k) { localStorage.removeItem(k); });
+            .filter(function (k) {
+              return k.indexOf(prefix) === 0;
+            })
+            .forEach(function (k) {
+              localStorage.removeItem(k);
+            });
         } catch (e) {}
       }
     };
@@ -175,7 +225,7 @@ SK.ui = (function () {
      (both set in tool.css) and on the text not wrapping: with wrapping on,
      one logical line can occupy several visual ones and the numbers would
      drift, so the gutter hides itself instead of lying. */
-  var GUTTER_CAP = 50000;   /* beyond this the numbers stop being useful and
+  var GUTTER_CAP = 50000; /* beyond this the numbers stop being useful and
                                the string starts to cost real memory */
 
   function gutter(target) {
@@ -209,7 +259,9 @@ SK.ui = (function () {
     var flagged = null;
     var visible = true;
 
-    target.addEventListener('scroll', function () { el.scrollTop = target.scrollTop; });
+    target.addEventListener('scroll', function () {
+      el.scrollTop = target.scrollTop;
+    });
 
     el.addEventListener('click', function (e) {
       if (target.tagName !== 'TEXTAREA') return;
@@ -241,17 +293,20 @@ SK.ui = (function () {
       if (!visible) return;
       var cs = getComputedStyle(el);
       el.style.width =
-        (nums.scrollWidth + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)) + 'px';
+        nums.scrollWidth + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 'px';
       /* offsetWidth, so the floor from min-width and the border are counted */
-      target.style.paddingLeft = (el.offsetWidth + 8) + 'px';
+      target.style.paddingLeft = el.offsetWidth + 8 + 'px';
     }
 
     function place() {
-      if (!flagged || flagged > count) { badge.hidden = true; return; }
+      if (!flagged || flagged > count) {
+        badge.hidden = true;
+        return;
+      }
       var m = metrics();
       badge.hidden = false;
       badge.textContent = flagged;
-      badge.style.top = (m.top + (flagged - 1) * m.line) + 'px';
+      badge.style.top = m.top + (flagged - 1) * m.line + 'px';
     }
 
     function select(line) {
@@ -280,9 +335,11 @@ SK.ui = (function () {
         visible = on;
         el.hidden = !on;
         if (on) resize();
-        else target.style.paddingLeft = '';   /* back to the stylesheet's value */
+        else target.style.paddingLeft = ''; /* back to the stylesheet's value */
       },
-      visible: function () { return visible; },
+      visible: function () {
+        return visible;
+      },
       select: select
     };
   }
@@ -304,14 +361,24 @@ SK.ui = (function () {
       msg.hidden = !text;
     }
     return {
-      ok:   function (t) { say('ok', t); },
-      err:  function (t) { say('err', t); },
-      info: function (t) { say('', t); },
-      clear: function () { say('', ''); },
+      ok: function (t) {
+        say('ok', t);
+      },
+      err: function (t) {
+        say('err', t);
+      },
+      info: function (t) {
+        say('', t);
+      },
+      clear: function () {
+        say('', '');
+      },
       stats: function (obj) {
-        stats.innerHTML = Object.keys(obj).map(function (k) {
-          return esc(k) + ' <b>' + esc(obj[k]) + '</b>';
-        }).join('&nbsp;&nbsp; ');
+        stats.innerHTML = Object.keys(obj)
+          .map(function (k) {
+            return esc(k) + ' <b>' + esc(obj[k]) + '</b>';
+          })
+          .join('&nbsp;&nbsp; ');
       }
     };
   }
@@ -326,8 +393,8 @@ SK.ui = (function () {
     el.hidden = true;
     el.innerHTML =
       '<div class="palette-box" role="dialog" aria-modal="true" aria-label="Jump to a tool">' +
-        '<input type="text" placeholder="jump to a tool…" autocomplete="off" spellcheck="false" aria-controls="p-list">' +
-        '<ul id="p-list" role="listbox"></ul>' +
+      '<input type="text" placeholder="jump to a tool…" autocomplete="off" spellcheck="false" aria-controls="p-list">' +
+      '<ul id="p-list" role="listbox"></ul>' +
       '</div>';
     document.body.appendChild(el);
 
@@ -341,24 +408,43 @@ SK.ui = (function () {
       var query = q.trim().toLowerCase();
       hits = (SK.tools || []).filter(function (t) {
         if (!query) return true;
-        return (t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || ''))
-          .toLowerCase().indexOf(query) !== -1;
+        return (
+          (t.name + ' ' + t.slug + ' ' + t.note + ' ' + (t.keys || ''))
+            .toLowerCase()
+            .indexOf(query) !== -1
+        );
       });
       cursor = 0;
       if (!hits.length) {
         list.innerHTML = '<li class="p-none">nothing matches</li>';
         return;
       }
-      list.innerHTML = hits.map(function (t, i) {
-        return '<li role="option" aria-selected="' + (i === 0) + '">' +
-               '<a href="/' + esc(t.slug) + '/">' + row(t) + '</a></li>';
-      }).join('');
+      list.innerHTML = hits
+        .map(function (t, i) {
+          return (
+            '<li role="option" aria-selected="' +
+            (i === 0) +
+            '">' +
+            '<a href="/' +
+            esc(t.slug) +
+            '/">' +
+            row(t) +
+            '</a></li>'
+          );
+        })
+        .join('');
       mark();
     }
 
     function row(t) {
-      return '<span class="p-name">' + esc(t.name) + '</span>' +
-             '<span class="p-note">' + esc(t.note) + '</span>';
+      return (
+        '<span class="p-name">' +
+        esc(t.name) +
+        '</span>' +
+        '<span class="p-note">' +
+        esc(t.note) +
+        '</span>'
+      );
     }
 
     function mark() {
@@ -387,27 +473,45 @@ SK.ui = (function () {
       if (t) location.href = '/' + t.slug + '/';
     }
 
-    input.addEventListener('input', function () { render(input.value); });
+    input.addEventListener('input', function () {
+      render(input.value);
+    });
 
     el.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { e.preventDefault(); close(); }
-      else if (e.key === 'ArrowDown') {
+      if (e.key === 'Escape') {
         e.preventDefault();
-        if (hits.length) { cursor = (cursor + 1) % hits.length; mark(); }
+        close();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (hits.length) {
+          cursor = (cursor + 1) % hits.length;
+          mark();
+        }
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (hits.length) { cursor = (cursor - 1 + hits.length) % hits.length; mark(); }
-      } else if (e.key === 'Enter') { e.preventDefault(); go(); }
+        if (hits.length) {
+          cursor = (cursor - 1 + hits.length) % hits.length;
+          mark();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        go();
+      }
     });
 
     /* clicking the backdrop, but not the box, dismisses */
-    el.addEventListener('mousedown', function (e) { if (e.target === el) close(); });
+    el.addEventListener('mousedown', function (e) {
+      if (e.target === el) close();
+    });
 
     list.addEventListener('mousemove', function (e) {
       var li = e.target.closest('li');
       if (!li || !li.parentNode) return;
       var i = Array.prototype.indexOf.call(list.children, li);
-      if (i >= 0 && i !== cursor) { cursor = i; mark(); }
+      if (i >= 0 && i !== cursor) {
+        cursor = i;
+        mark();
+      }
     });
 
     return { open: open, close: close, el: el };
@@ -434,8 +538,7 @@ SK.ui = (function () {
         var wantMod = parts.indexOf('mod') !== -1;
         var wantShift = parts.indexOf('shift') !== -1;
         var key = parts[parts.length - 1];
-        if (wantMod === mod && wantShift === e.shiftKey &&
-            e.key.toLowerCase() === key) {
+        if (wantMod === mod && wantShift === e.shiftKey && e.key.toLowerCase() === key) {
           e.preventDefault();
           map[combo](e);
           return;
@@ -451,10 +554,20 @@ SK.ui = (function () {
   });
 
   return {
-    $: $, $$: $$, esc: esc, debounce: debounce,
-    toast: toast, copy: copy, download: download,
-    acceptDrop: acceptDrop, readText: readText, readBytes: readBytes,
-    store: store, status: status, gutter: gutter,
-    openPalette: openPalette, keys: keys
+    $: $,
+    $$: $$,
+    esc: esc,
+    debounce: debounce,
+    toast: toast,
+    copy: copy,
+    download: download,
+    acceptDrop: acceptDrop,
+    readText: readText,
+    readBytes: readBytes,
+    store: store,
+    status: status,
+    gutter: gutter,
+    openPalette: openPalette,
+    keys: keys
   };
 })();
