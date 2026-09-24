@@ -296,7 +296,7 @@
       if (!m || !m[0]) err('invalid number', start);
       /* catch what the regex stopped short of: 01, 1., .5, 1e */
       var after = src[i + m[0].length];
-      if (after !== undefined && /[0-9.eE+\-]/.test(after)) {
+      if (after !== undefined && /[0-9.eE+-]/.test(after)) {
         err('invalid number ' + JSON.stringify(src.slice(start, start + m[0].length + 1)), start);
       }
       i += m[0].length;

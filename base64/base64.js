@@ -139,6 +139,7 @@
     } catch (e) { /* not utf-8 — treat it as binary */ }
 
     /* a NUL or a stray control character means it is not text either */
+    /* eslint-disable-next-line no-control-regex -- control characters are what it looks for */
     if (asText !== null && /[\x00-\x08\x0e-\x1f]/.test(asText)) asText = null;
 
     if (asText !== null) {

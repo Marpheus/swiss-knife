@@ -1,0 +1,19 @@
+{
+  "name": "tools",
+  "private": true,
+  "description": "Text and data tools that run entirely in the browser.",
+  "license": "MIT",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node test/myers.test.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9"
+  }
+}

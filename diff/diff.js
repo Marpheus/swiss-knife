@@ -4,7 +4,7 @@
    presentation: hunks with context, side-by-side or unified, word-level
    emphasis inside a changed line, and a unified patch for the clipboard. */
 (function () {
-  var ui = SK.ui, B = SK.bytes;
+  var ui = SK.ui;
   var $ = ui.$;
 
   var els = {
@@ -139,7 +139,6 @@
   function renderRows(script, A, Bl) {
     var groups = els.all.checked ? [{ from: 0, to: script.length }] : hunks(script);
     var html = '';
-    var shown = 0;
 
     groups.forEach(function (g, gi) {
       if (gi === 0 && g.from > 0) html += gapRow(g.from);
