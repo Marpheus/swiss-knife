@@ -37,13 +37,54 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 # ─── keep the workings out of the served site ─────────────────────────────
+#
+# force = true is what makes these work: without it Netlify only applies a
+# rule when no file exists at the path, and these paths all exist.
 
 [[redirects]]
   from = "/test/*"
   to = "/404.html"
   status = 404
+  force = true
+
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404.html"
+  status = 404
+  force = true
 
 [[redirects]]
   from = "/netlify.toml"
   to = "/404.html"
   status = 404
+  force = true
+
+[[redirects]]
+  from = "/README.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/LICENSE"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/eslint.config.mjs"
+  to = "/404.html"
+  status = 404
+  force = true
